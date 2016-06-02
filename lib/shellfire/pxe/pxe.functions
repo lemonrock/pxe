@@ -204,7 +204,8 @@ _pxe_prepareIPxe()
 			make bin/undionly.kpxe 1>/dev/null 2>/dev/null EMBED="$iPxeFolderPath"/embed.ipxe
 		
 		popd
-	
+		
+		ls -la "$currentIPxeFolderPath"/src/bin/
 		rm -rf "$pxe_ipxe_destinationFilePath"
 		mv "$currentIPxeFolderPath"/src/bin/undionly.kpxe "$pxe_ipxe_destinationFilePath"
 		

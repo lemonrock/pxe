@@ -136,7 +136,7 @@ assign_unsetCgiVariablesToSensibleDefaults()
 init()
 {
 	validate_GATEWAY_INTERFACE
-	validate_GATEWAY_INTERFACE
+	validate_SERVER_PROTOCOL
 	assign_unsetCgiVariablesToSensibleDefaults
 }
 
@@ -336,6 +336,9 @@ LABEL power-off
 main()
 {
 	init
+	
+	echo "${SCRIPT_NAME}${_PATH_INFO}" 1>&2
+	env 1>&2
 	
 	case "${SCRIPT_NAME}${_PATH_INFO}" in
 		

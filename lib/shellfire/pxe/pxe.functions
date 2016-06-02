@@ -136,7 +136,7 @@ pxe_action_http_start()
 		
 	local httpdFolderPath="$_program_etcPath"/shellfire/pxe/httpd
 	(
-		env -i httpd -c "$httpdFolderPath"/httpd.conf -p 8080 -h "$httpdFolderPath"/root
+		_pxe_runLongLived httpd -c "$httpdFolderPath"/httpd.conf -p 8080 -h "$httpdFolderPath"/root
 	)
 	sleep 1
 	
@@ -226,7 +226,7 @@ pxe_dnsmasq_start()
 	local dhcpConfigurationFolderPath="$configurationFolderPath"/dhcp
 	local varRunFolderPath="$_program_varPath"/run
 	local varLibFolderPath="$_program_varPath"/lib/dnsmasq
-	env -i dnsmasq \
+	_pxe_runLongLived dnsmasq \
 		--conf-file="$configurationFolderPath"/dnsmasq.conf \
 		--conf-dir="$configurationFolderPath"/dnsmasq.conf.d \
 		--pid-file="$varRunFolderPath"/dnsmasq.pid \
@@ -244,3 +244,9 @@ pxe_dnsmasq_start()
 	
 	#dhcp-authoritative - allows lease database rebuild
 }	
+
+core_dependency_requires '*' env
+_pxe_runLongLived()
+{
+	env -i PATH="/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin" LC_ALL="en_US.UTF-8" "$@"
+}

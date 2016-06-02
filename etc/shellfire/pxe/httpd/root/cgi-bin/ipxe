@@ -126,7 +126,7 @@ validate_thereIsNoRequestMessageBody()
 
 assign_unsetCgiVariablesToSensibleDefaults()
 {
-	_PATH_INFO=" ${PATH_INFO:-}"
+	_PATH_INFO="${PATH_INFO:-}"
 	_PATH_TRANSLATED="${PATH_TRANSLATED:-}"
 	_REMOTE_HOST="${REMOTE_HOST:-}"
 	_CONTENT_TYPE="${CONTENT_TYPE:-}"

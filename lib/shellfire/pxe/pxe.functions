@@ -43,7 +43,7 @@ pxe_action_update_malware_hosts()
 		# Ignore curl errors; a provider may be temporarily offline
 		core_message INFO "Downloading malware hosts list '$name' from '$url'"
 		curl --fail --silent --location "$url" >"$TMP_FILE" || continue
-		dos2unix --quiet "$TMP_FILE"
+		dos2unix "$TMP_FILE" 1>/dev/null 2>/dev/null
 		sed -i 's/^127.0.0.1/0.0.0.0/g' "$TMP_FILE"
 		sed -i '/ localhost$/d' "$TMP_FILE"
 		sed -i '/ broadcasthost$/d' "$TMP_FILE"

@@ -158,9 +158,6 @@ main()
 {
 	init
 	
-	echo x"${SCRIPT_NAME}${PATH_INFO}"x 1>&2
-	env 1>&2
-	
 	case "${SCRIPT_NAME}${PATH_INFO}" in
 		
 		'/cgi-bin/ipxe')

@@ -118,15 +118,16 @@ core_dependency_requires '*' head ps tail grep rm
 pxe_action_http_start()
 {	
 	if ! core_path_isReadableNonEmptyFilePath "$pxe_ipxe_destinationFolderPath"; then
+		core_message INFO "Preparing ipxe before starting httpd"
 		_pxe_prepareIPxe
 	fi
 	
 	local pidFilePath="$_program_varPath"/run/httpd.pid
 	if [ -s "$pidFilePath" ]; then
-		local httpExistingPid="$(head -n 1)"
+		local httpPid="$(head -n 1)"
 		# trailing space is delivebate
-		if ps -o pid,comm | tail -n +2 | grep -q "${httpExistingPid} "; then
-			core_message WARN "BusyBox httpd already running as pid '$httpPid'; stop with  kill -9 $httpPid && rm -rf ${pidFilePath}"
+		if ps -o pid,comm | tail -n +2 | grep -q "${httpPid} "; then
+			core_message WARN "BusyBox httpd already running as pid '$httpdPid'; stop with  kill -9 $httpdPid && rm -rf ${pidFilePath}"
 			return 0
 		fi
 	fi

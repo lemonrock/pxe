@@ -152,7 +152,7 @@ pxe_action_http_start()
 
 _pxe_installAlpineLinuxPackages()
 {
-	if ! core_whichNoOutput apk; then
+	if ! core_compatibility_whichNoOutput apk; then
 		return 0
 	fi
 	

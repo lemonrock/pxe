@@ -186,14 +186,7 @@ execute_pxelinux_config()
 		local allowoptions=0
 		local tabMessage="NOTABMSG Production Mode. Pressing [Tab] will not edit options"
 	fi
-	
-	// https://netbootxyz.readthedocs.io/en/latest/boot-tftp/index.html
-	// Integrate memtest86+ (use tools to extract)
-	// Add support for a lua.c32 - cool! - http://www.syslinux.org/wiki/index.php?title=Lua.c32
-	// 32 or 64 bit Alpine Linux? Use http://www.syslinux.org/wiki/index.php?title=Ifcpu64.c32
-	// ? initrd merging ? - base image + customisation ?
-	// Debugging - add disk.c32 and meminfo.c32 and lua.c32
-	
+		
 	local architecture="amd64"
 	return_plaintext "DEFAULT menu.c32
 PROMPT ${prompt}

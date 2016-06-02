@@ -143,7 +143,7 @@ pxe_action_http_start()
 	fi
 	
 	printf '%s' "$httpdPid" >"$_program_varPath"/run/httpd.pid
-	core_message INFO "BusyBox httpd is running as PID '$httpPid'"
+	core_message INFO "BusyBox httpd is running as PID '$httpdPid'"
 }
 
 _pxe_installAlpineLinuxPackages()

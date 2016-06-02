@@ -58,7 +58,8 @@ pxe_action_update_malware_hosts()
 
 pxe_action_update_ipxe()
 {
-	pxe_ipxe_destinationFilePath="$varLibFolderPath"/tftp/undionly.kpxe
+	local
+	pxe_ipxe_destinationFilePath="$_program_varPath"/lib/tftp/undionly.kpxe
 	_pxe_prepareIPxe
 }
 
@@ -118,7 +119,7 @@ pxe_action_http_stop()
 core_dependency_requires '*' head ps tail grep rm
 pxe_action_http_start()
 {
-	pxe_ipxe_destinationFilePath="$varLibFolderPath"/tftp/undionly.kpxe
+	pxe_ipxe_destinationFilePath="$_program_varPath"/lib/tftp/undionly.kpxe
 	
 	if ! core_path_isReadableNonEmptyFilePath "$pxe_ipxe_destinationFilePath"; then
 		_pxe_prepareIPxe

@@ -337,7 +337,7 @@ main()
 {
 	init
 	
-	case "${SCRIPT_NAME}${_PATH_INFO}"
+	case "${SCRIPT_NAME}${_PATH_INFO}" in
 		
 		'/cgi-bin/execute_ipxe')
 			execute_ipxe

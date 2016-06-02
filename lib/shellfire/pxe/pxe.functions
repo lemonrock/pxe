@@ -135,7 +135,9 @@ pxe_action_http_start()
 	rm -rf "$pidFilePath"
 		
 	local httpdFolderPath="$_program_etcPath"/shellfire/pxe/httpd
-	httpd -c "$httpdFolderPath"/httpd.conf -p 8080 -h "$httpdFolderPath"/root
+	(
+		env -i httpd -c "$httpdFolderPath"/httpd.conf -p 8080 -h "$httpdFolderPath"/root
+	)
 	sleep 1
 	
 	local httpdPid="$(ps -o comm,pid | tail -n +2 | grep '^httpd ' | awk '{print $2}')"
@@ -224,7 +226,7 @@ pxe_dnsmasq_start()
 	local dhcpConfigurationFolderPath="$configurationFolderPath"/dhcp
 	local varRunFolderPath="$_program_varPath"/run
 	local varLibFolderPath="$_program_varPath"/lib/dnsmasq
-	exec dnsmasq \
+	env -i dnsmasq \
 		--conf-file="$configurationFolderPath"/dnsmasq.conf \
 		--conf-dir="$configurationFolderPath"/dnsmasq.conf.d \
 		--pid-file="$varRunFolderPath"/dnsmasq.pid \

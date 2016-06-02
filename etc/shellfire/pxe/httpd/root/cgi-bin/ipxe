@@ -337,7 +337,7 @@ main()
 {
 	init
 	
-	echo "${SCRIPT_NAME}${_PATH_INFO}" 1>&2
+	echo x"${SCRIPT_NAME}${_PATH_INFO}"x 1>&2
 	env 1>&2
 	
 	case "${SCRIPT_NAME}${_PATH_INFO}" in

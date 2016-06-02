@@ -204,6 +204,9 @@ _pxe_prepareIPxe()
 			make bin/undionly.kpxe 1>/dev/null 2>/dev/null EMBED="$iPxeFolderPath"/embed.ipxe
 		
 		popd
+	
+		rm -rf "$pxe_ipxe_destinationFilePath"
+		mv "$currentIPxeFolderPath"/src/bin/undionly.kpxe "$pxe_ipxe_destinationFilePath"
 		
 		make clean 1>/dev/null 2>/dev/null || true
 		git reset --hard --quiet
@@ -211,8 +214,6 @@ _pxe_prepareIPxe()
 		
 	popd
 	
-	rm -rf "$pxe_ipxe_destinationFilePath"
-	mv "$currentIPxeFolderPath"/src/bin/undionly.kpxe "$pxe_ipxe_destinationFilePath"
 	# Even though we clean up tmp files at program termination, we could run for some time
 	rm -rf "$iPxeScriptFilePath"
 }

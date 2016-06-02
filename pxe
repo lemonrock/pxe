@@ -39,8 +39,12 @@ _program_commandLine_parse()
 			shift 1
 		;;
 		
-		*)
+		--help|-h)
 			:
+		;;
+		
+		*)
+			core_exitError $core_commandLine_exitCode_USAGE "Unrecognised action '$1'"
 		;;
 		
 	esac

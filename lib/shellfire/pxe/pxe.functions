@@ -137,7 +137,7 @@ pxe_action_http_start()
 	httpd -c "$httpdFolderPath"/httpd.conf -p 8080 -h "$httpdFolderPath"/root
 	sleep 1
 	
-	local httpdPid="$(ps -o comm,pid | tail -n +2 | grep '^http ' | awk '{print $2}')"
+	local httpdPid="$(ps -o comm,pid | tail -n +2 | grep '^httpd ' | awk '{print $2}')"
 	if [ -z "$httpdPid" ]; then
 		core_exitError $core_commandLine_exitCode_SOFTWARE "BusyBox httpd did not start"
 	fi

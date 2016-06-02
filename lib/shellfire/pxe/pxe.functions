@@ -123,10 +123,10 @@ pxe_action_http_start()
 	fi
 	
 	local pidFilePath="$_program_varPath"/run/httpd.pid
-	if [ -s "$pidFilePath" ]; then
-		local httpPid="$(head -n 1)"
+	if core_path_isReadableNonEmptyFilePath "$pidFilePath"; then
+		local httpdPid="$(head -n 1 "$pidFilePath")"
 		# trailing space is delivebate
-		if ps -o pid,comm | tail -n +2 | grep -q "${httpPid} "; then
+		if ps -o pid,comm | tail -n +2 | grep -q "${httpdPid} "; then
 			core_message WARN "BusyBox httpd already running as pid '$httpdPid'; stop with  kill -9 $httpdPid && rm -rf ${pidFilePath}"
 			return 0
 		fi

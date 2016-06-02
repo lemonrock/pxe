@@ -58,8 +58,6 @@ pxe_action_update_malware_hosts()
 
 pxe_action_update_ipxe()
 {
-	local
-	pxe_ipxe_destinationFilePath="$_program_varPath"/lib/tftp/undionly.kpxe
 	_pxe_prepareIPxe
 }
 
@@ -118,10 +116,8 @@ pxe_action_http_stop()
 
 core_dependency_requires '*' head ps tail grep rm
 pxe_action_http_start()
-{
-	pxe_ipxe_destinationFilePath="$_program_varPath"/lib/tftp/undionly.kpxe
-	
-	if ! core_path_isReadableNonEmptyFilePath "$pxe_ipxe_destinationFilePath"; then
+{	
+	if ! core_path_isReadableNonEmptyFilePath "$pxe_ipxe_destinationFolderPath"; then
 		_pxe_prepareIPxe
 	fi
 	
@@ -184,7 +180,7 @@ _pxe_installAlpineLinuxPackage()
 	fi
 }
 
-core_dependency_requires '*' grep id make git rm cp
+core_dependency_requires '*' grep id make git rm mv
 core_dependency_requires '*' perl gcc ld ar rm
 _pxe_prepareIPxe()
 {
@@ -205,9 +201,8 @@ _pxe_prepareIPxe()
 		
 		popd
 		
-		set -x
-		rm -rf "$pxe_ipxe_destinationFilePath"
-		cp "$currentIPxeFolderPath"/src/bin/undionly.kpxe "$pxe_ipxe_destinationFilePath"
+		rm -rf "$pxe_ipxe_destinationFolderPath"/undionly.kpxe
+		mv "$currentIPxeFolderPath"/src/bin/undionly.kpxe "$pxe_ipxe_destinationFolderPath"
 		
 		make clean 1>/dev/null 2>/dev/null || true
 		git reset --hard --quiet

@@ -12,7 +12,9 @@ _program()
 		if ! core_functions_exists "$functionToExecuteForAction"; then
 			core_exitError $core_commandLine_exitCode_SOFTWARE "No such action '$pxe_action'"
 		fi
-		
+
+		pxe_ipxe_destinationFolderPath="$_program_varPath"/lib/dnsmasq/tftp
+			
 		"$functionToExecuteForAction" "$@"
     }
 }

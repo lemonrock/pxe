@@ -126,7 +126,6 @@ validate_thereIsNoRequestMessageBody()
 
 assign_unsetCgiVariablesToSensibleDefaults()
 {
-	_PATH_INFO="${PATH_INFO:-}"
 	_PATH_TRANSLATED="${PATH_TRANSLATED:-}"
 	_REMOTE_HOST="${REMOTE_HOST:-}"
 	_CONTENT_TYPE="${CONTENT_TYPE:-}"
@@ -155,199 +154,17 @@ chain http://boot.ipxe.org/demo/boot.php
 "
 }
 
-execute_pxelinux_config()
-{
-	validate_requestIsGet
-	
-	validate_thereIsNoQueryString
-	
-	validate_thereIsNoContentType
-	
-	validate_thereIsNoRequestMessageBody
-	
-	# Set to 0 to disable VGA forwarding to serial console; may be necessary for this device
-	local console=1
-	
-	local debugging=false
-	if $debugging; then
-		local prompt=1
-		local timeout=35996
-		local totalTimeout=0
-		local noescape=0
-		local allowoptions=1
-		local tabMessage="TABMSG Debug Mode. Press [Tab] to edit options"
-	else
-		local prompt=0
-		# 3 seconds
-		local timeout=30
-		# Always boot, regardless of activity, after one minute
-		local totalTimeout=600
-		local noescape=1
-		local allowoptions=0
-		local tabMessage="NOTABMSG Production Mode. Pressing [Tab] will not edit options"
-	fi
-		
-	local architecture="amd64"
-	return_plaintext "DEFAULT menu.c32
-PROMPT ${prompt}
-TIMEOUT ${timeout}
-TOTALTIMEOUT ${totalTimeout}
-NOHALT 1
-CONSOLE ${console}
-
-MENU TITLE PXE Boot Menu
-MENU AUTOBOOT Starting linux-${architecture} in # second{,s}...
-MENU ${tabMessage}
-MENU PASSPROMPT Enter Password:
-MENU COLOR screen 37;40 #80ffffff #00000000 std
-MENU COLOR border 30;44 #40000000 #00000000 std
-MENU COLOR title 1;36;44 #c00090f0 #00000000 std
-MENU COLOR unsel 37;44 #90ffffff #00000000 std
-MENU COLOR hotkey 1;37;44 #ffffffff #00000000 std
-MENU COLOR sel 7;37;40 #e0000000 #20ff8000 all
-MENU COLOR hotsel 1;7;37;40 #e0400000 #20ff8000 all
-MENU COLOR disabled 1;30;44 #60cccccc #00000000 std
-MENU COLOR scrollbar 30;44 #40000000 #00000000 std
-MENU COLOR tabmsg 31;40 #90ffff00 #00000000 std
-MENU COLOR cmdmark 1;36;40 #c000ffff #00000000 std
-MENU COLOR cmdline 37;40 #c0ffffff #00000000 std
-MENU COLOR pwdborder 30;47 #80ffffff #20ffffff std
-MENU COLOR pwdheader 31;47 #80ff8080 #20ffffff std
-MENU COLOR pwdentry 30;47 #80ffffff #20ffffff std
-MENU COLOR timeout_msg 37;40 #80ffffff #00000000 std
-MENU COLOR timeout 1;37;40 #c0ffffff #00000000 std
-MENU COLOR help 37;40 #c0ffffff #00000000 std
-MENU COLOR msg07 37;40 #90ffffff #00000000 std
-MENU WIDTH 80
-MENU MARGIN 10
-MENU PASSWORDMARGIN 3
-MENU ROWS 12
-MENU TABMSGROW 18
-MENU CMDLINEROW 18
-MENU ENDROW -1
-MENU PASSWORDROW 11
-MENU TIMEOUTROW 20
-MENU HELPMSGROW 22
-MENU HELPMSGENDROW -1
-MENU HIDDENROW -2
-MENU HSHIFT 0
-MENU VSHIFT 0
-MENU MASTER PASSWD yourpassword
-NOESCAPE ${noescape}
-ALLOWOPTIONS ${allowoptions}
-
-LABEL -
-  MENU LABEL Network:
-  MENU DISABLE
-  
-LABEL linux-${architecture}
-  MENU LABEL ^Boot Main System
-  MENU INDENT 1
-  MENU DEFAULT
-  SAY Now booting the Main System from PXELINUX...
-  LINUX http://${SERVER_NAME}:${SERVER_PORT}/cgi/kernel/${architecture}
-  APPEND initrd=http://${SERVER_NAME}:${SERVER_PORT}/cgi/initrd/${architecture}
-
-MENU SEPARATOR
-LABEL -
-  MENU LABEL Memory Testing:
-  MENU INDENT 1
-  MENU DISABLE
-
-LABEL memtest86-default
-  MENU LABEL ^Memory test
-  MENU INDENT 2
-  SAY Running Memtest86 V4.3 Diagnostic...
-  KERNEL memtest
-  APPEND -
-
-LABEL memtest86-one-pass
-  MENU LABEL Memory test (one pass enabled)
-  MENU INDENT 2
-  SAY Running Memtest86 V4.3 Diagnostic (one pass enabled)...
-  KERNEL memtest
-  APPEND onepass
-
-MENU SEPARATOR
-LABEL -
-  MENU LABEL Troubleshooting:
-  MENU INDENT 2
-  MENU DISABLE
-
-LABEL memtest86-boot-trace
-  MENU LABEL Memory test (boot trace enabled)
-  MENU INDENT 3
-  SAY Running Memtest86 V4.3 Diagnostic Troubleshooting (boot trace enabled)...
-  KERNEL memtest
-  APPEND btrace
-
-LABEL memtest86-start-only-one-cpu
-  MENU LABEL Memory test (start only one CPU)
-  MENU INDENT 3
-  SAY Running Memtest86 V4.3 Diagnostic Troubleshooting (start only one CPU)...
-  KERNEL memtest
-  APPEND maxcpus=1
-
-LABEL memtest86-serial-console
-  MENU LABEL Memory test (serial console enabled)
-  MENU INDENT 3
-  SAY Running Memtest86 V4.3 Diagnostic Troubleshooting (serial console enabled)...
-  KERNEL memtest
-  APPEND console=ttyS0,9600
-
-MENU SEPARATOR
-LABEL -
-  MENU LABEL Local:
-  MENU DISABLE
-
-LABEL bootlocal
-  MENU LABEL Boot from ^local drive
-  MENU INDENT 1
-  SAY Now booting from the local drive...
-  LOCALBOOT 0
-
-LABEL skip
-  MENU LABEL Boot from ^next boot device
-  MENU INDENT 1
-  SAY Skipping to next boot device...
-  LOCALBOOT -1
-
-LABEL reboot-warm
-  MENU LABEL Warm ^Reboot
-  MENU INDENT 1
-  SAY Now warm rebooting
-  COM32 reboot.c32
-  APPEND -w
-
-LABEL reboot-cold
-  MENU LABEL Cold Reboot
-  MENU INDENT 1
-  SAY Now cold rebooting
-  COM32 reboot.c32
-
-LABEL power-off
-  MENU LABEL Power Off
-  MENU INDENT 1
-  SAY Now powering off..
-  COM32 poweroff.c32
-"
-}
-
 main()
 {
 	init
 	
-	echo x"${SCRIPT_NAME}${_PATH_INFO}"x 1>&2
+	echo x"${SCRIPT_NAME}${PATH_INFO}"x 1>&2
 	env 1>&2
 	
-	case "${SCRIPT_NAME}${_PATH_INFO}" in
+	case "${SCRIPT_NAME}${PATH_INFO}" in
 		
-		'/cgi-bin/execute_ipxe')
+		'/cgi-bin/ipxe')
 			execute_ipxe
-		;;
-		
-		'/cgi-bin/pxelinux-config')
-			execute_pxelinux_config	
 		;;
 	
 		*)

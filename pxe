@@ -13,16 +13,7 @@ _program()
 			core_exitError $core_commandLine_exitCode_SOFTWARE "No such action '$pxe_action'"
 		fi
 		
-		pxe_${pxe_action} "$@"
-		
-		pxe_downloadMalwareHostsFiles
-		
-		# We should wrap-up dnsmasq
-		# Need to set rlimit for maximum connections / file descriptors under tftp
-		# Need to template dnsmasq.conf for tftp-root
-		
-		
-		
+		"$functionToExecuteForAction" "$@"
     }
 }
 

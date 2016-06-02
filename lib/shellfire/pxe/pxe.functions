@@ -184,7 +184,7 @@ _pxe_installAlpineLinuxPackage()
 	fi
 }
 
-core_dependency_requires '*' grep id make git mv rm
+core_dependency_requires '*' grep id make git rm cp
 core_dependency_requires '*' perl gcc ld ar rm
 _pxe_prepareIPxe()
 {
@@ -205,9 +205,9 @@ _pxe_prepareIPxe()
 		
 		popd
 		
-		ls -la "$currentIPxeFolderPath"/src/bin/
+		set -x
 		rm -rf "$pxe_ipxe_destinationFilePath"
-		mv "$currentIPxeFolderPath"/src/bin/undionly.kpxe "$pxe_ipxe_destinationFilePath"
+		cp "$currentIPxeFolderPath"/src/bin/undionly.kpxe "$pxe_ipxe_destinationFilePath"
 		
 		make clean 1>/dev/null 2>/dev/null || true
 		git reset --hard --quiet

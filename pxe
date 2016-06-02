@@ -27,7 +27,7 @@ _program_commandLine_parse()
 	
 	case "$1" in
 		
-		update_malware_hosts|update_ipxe|http_start|dnsmasq_start|dnsmasq_reconfigure|dnsmasq_write_statistics|dnsmasq_logrotate|dnsmasq_stop)
+		update_malware_hosts|update_ipxe|http_start|http_stop|dnsmasq_start|dnsmasq_reconfigure|dnsmasq_write_statistics|dnsmasq_logrotate|dnsmasq_stop)
 			pxe_action="$1"
 			shift 1
 		;;

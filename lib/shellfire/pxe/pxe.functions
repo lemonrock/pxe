@@ -209,9 +209,6 @@ _pxe_prepareIPxe()
 		git clean -d --force --quiet -x
 		
 	popd
-	
-	# Even though we clean up tmp files at program termination, we could run for some time
-	rm -rf "$iPxeScriptFilePath"
 }
 
 core_dependency_requires '*' id dnsmasq

@@ -212,7 +212,7 @@ _pxe_prepareIPxe()
 	popd
 	
 	rm -rf "$pxe_ipxe_destinationFilePath"
-	mv "$currentIPxeFolderPath"/undionly.kpxe "$pxe_ipxe_destinationFilePath"
+	mv "$currentIPxeFolderPath"/src/bin/undionly.kpxe "$pxe_ipxe_destinationFilePath"
 	# Even though we clean up tmp files at program termination, we could run for some time
 	rm -rf "$iPxeScriptFilePath"
 }

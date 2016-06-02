@@ -1,0 +1,248 @@
+# This file is part of pxe. It is subject to the licence terms in the COPYRIGHT file found in the top-level directory of this distribution and at https://raw.githubusercontent.com/lemonrock/pxe/master/COPYRIGHT. No part of pxe, including this file, may be copied, modified, propagated, or distributed except according to the terms contained in the COPYRIGHT file.
+# Copyright © 2014-2015 The developers of pxe. See the COPYRIGHT file in the top-level directory of this distribution and at https://raw.githubusercontent.com/lemonrock/pxe/master/COPYRIGHT.
+
+
+core_dependency_requires '*' rm curl dos2unix sed cp
+pxe_action_update_malware_hosts()
+{
+	local hostsFolderPath="$_program_etcPath"/shellfire/pxe/dnsmasq/hosts/hosts.d
+	local hostFileUrlsFilePath="$_program_etcPath"/shellfire/pxe/host-file-urls
+	
+	pushd "$hostsFolderPath"
+		set +f
+			local malwareFileName
+			for malwareFileName in *.malware.hosts
+			do
+				set -f
+				local noLongerDownloaded=true
+				local originalName="${malwareFileName%.malware.hosts}"
+
+				local name
+				local url
+				while read -r name url
+				do
+					if [ "$originalName" = "$name" ]; then
+						noLongerDownloaded=false
+						break
+					fi
+				done <"$hostFileUrlsFilePath"
+			
+				if $noLongerDownloaded; then
+					rm -rf "$malwareFileName"
+				fi
+			done
+		set -f
+	popd
+	
+	local TMP_FILE
+	local name
+	local url
+	while read -r name url
+	do
+		core_temporaryFiles_newFileToRemoveOnExit
+		# Ignore curl errors; a provider may be temporarily offline
+		core_message INFO "Downloading malware hosts list '$name' from '$url'"
+		curl --fail --silent --location "$url" >"$TMP_FILE" || continue
+		dos2unix --quiet "$TMP_FILE"
+		sed -i 's/^127.0.0.1/0.0.0.0/g' "$TMP_FILE"
+		sed -i '/ localhost$/d' "$TMP_FILE"
+		sed -i '/ broadcasthost$/d' "$TMP_FILE"
+		sed -i '/ local$/d' "$TMP_FILE"
+		sed -i '/ localhost.localdomain$/d' "$TMP_FILE"
+		sed -i '/^::1/d' "$TMP_FILE"
+		cp -f "$TMP_FILE" "$hostsFolderPath"/"$name".malware.hosts
+		# Even though we clean up tmp files at program termination, these files are potentially quite large for a temp space
+		rm "$TMP_FILE"
+	done <"$hostFileUrlsFilePath"
+}
+
+pxe_action_update_ipxe()
+{
+	pxe_ipxe_destinationFilePath="$varLibFolderPath"/tftp/undionly.kpxe
+	_pxe_prepareIPxe
+}
+
+core_dependency_requires '*' head rm
+_pxe_signal()
+{
+	local program="$1"
+	local signal="$2"
+	local removePidFile="$3"
+	
+	local pidFilePath="$_program_varPath"/run/"$program".pid
+	
+	if ! core_path_isReadableNonEmptyFilePath "$pidFilePath"; then
+		core_exitError $core_commandLine_exitCode_NOINPUT "There is no $program pid file at '$pidFilePath'"
+	fi
+	
+	local pid="$(head -n 1 "$pidFilePath")"
+	set +e
+	kill -"$signal" "$pid"
+	local exitCode=$?
+	set -e
+	
+	if [ $exitCode -ne 0 ]; then
+		core_exitError $core_commandLine_exitCode_CONFIG "Could not send signal '$signal' to $program at pid '$pid' from pid file '$pidFilePath'"
+	fi
+	
+	if $removePidFile; then
+		rm -rf "$pidFilePath"
+	fi
+}
+
+pxe_action_dnsmasq_reconfigure()
+{
+	_pxe_signal dnsmasq 'SIGHUP' false
+}
+
+pxe_action_dnsmasq_write_statistics()
+{
+	_pxe_signal dnsmasq 'SIGUSR1' false
+}
+
+pxe_action_dnsmasq_logrotate()
+{
+	_pxe_signal dnsmasq 'SIGUSR2' false
+}
+
+pxe_action_dnsmasq_stop()
+{
+	_pxe_signal dnsmasq 'SIGINT' true
+}
+
+pxe_action_http_stop()
+{
+	_pxe_signal httpd 'SIGINT' true
+}
+
+core_dependency_requires '*' head ps tail grep rm
+pxe_action_http_start()
+{
+	pxe_ipxe_destinationFilePath="$varLibFolderPath"/tftp/undionly.kpxe
+	
+	if ! core_path_isReadableNonEmptyFilePath "$pxe_ipxe_destinationFilePath"; then
+		_pxe_prepareIPxe
+	fi
+	
+	local pidFilePath="$_program_varPath"/run/httpd.pid
+	if [ -s "$pidFilePath" ]; then
+		local httpExistingPid="$(head -n 1)"
+		# trailing space is delivebate
+		if ps -o pid,comm | tail -n +2 | grep -q "${httpExistingPid} "; then
+			core_message WARN "BusyBox httpd already running as pid '$httpPid'; stop with  kill -9 $httpPid && rm -rf ${pidFilePath}"
+			return 0
+		fi
+	fi
+	
+	rm -rf "$pidFilePath"
+		
+	local httpdFolderPath="$_program_etcPath"/shellfire/pxe/httpd
+	httpd -c "$httpdFolderPath"/httpd.conf -p 8080 -h "$httpdFolderPath"/root
+	sleep 1
+	
+	local httpdPid="$(ps -o comm,pid | tail -n +2 | grep '^http ' | awk '{print $2}')"
+	if [ -z "$httpdPid" ]; then
+		core_exitError $core_commandLine_exitCode_SOFTWARE "BusyBox httpd did not start"
+	fi
+	
+	printf '%s' "$httpdPid" >"$_program_varPath"/run/httpd.pid
+	core_message INFO "BusyBox httpd is running as PID '$httpPid'"
+}
+
+_pxe_installAlpineLinuxPackages()
+{
+	if ! core_whichNoOutput apk; then
+		return 0
+	fi
+	
+	local packageName
+	for packageName in "$@"
+	do
+		_pxe_installAlpineLinuxPackage "$packageName"
+	done
+}
+
+_pxe_installAlpineLinuxPackage()
+{
+	local packageName="$1"
+	
+	local shouldInstall=false
+	
+	if [ ! -s /etc/apk/world ]; then
+		shouldInstall=true
+	elif ! grep -q '^'"$packageName"'$' /etc/apk/world; then
+		shouldInstall=true
+	fi
+	if $shouldInstall; then
+		if [ "$(id -u)" == 0 ]; then
+			set -- apk
+		else
+			set -- sudo -p "Please enter your password to install package '$packageName' using apk add: " apk
+		fi
+		"$@" add "$packageName"
+	fi
+}
+
+core_dependency_requires '*' grep id make git mv rm
+core_dependency_requires '*' perl gcc ld ar rm
+_pxe_prepareIPxe()
+{
+	_pxe_installAlpineLinuxPackages alpine-sdk perl xz-dev
+
+	local iPxeFolderPath="$_program_etcPath"/shellfire/pxe/iPXE
+	local currentIPxeFolderPath="$iPxeFolderPath"/current
+		
+	pushd "$currentIPxeFolderPath"
+		
+		make clean 1>/dev/null 2>/dev/null || true
+		git reset --hard --quiet
+		git clean -d --force --quiet -x
+		
+		pushd src
+		
+			make bin/undionly.kpxe 1>/dev/null 2>/dev/null EMBED="$iPxeFolderPath"/embed.ipxe
+		
+		popd
+		
+		make clean 1>/dev/null 2>/dev/null || true
+		git reset --hard --quiet
+		git clean -d --force --quiet -x
+		
+	popd
+	
+	rm -rf "$pxe_ipxe_destinationFilePath"
+	mv "$currentIPxeFolderPath"/undionly.kpxe "$pxe_ipxe_destinationFilePath"
+	# Even though we clean up tmp files at program termination, we could run for some time
+	rm -rf "$iPxeScriptFilePath"
+}
+
+core_dependency_requires '*' id dnsmasq
+pxe_dnsmasq_start()
+{
+	_pxe_installAlpineLinuxPackages dnsmasq
+	
+	local scriptUser="$(id -u)"
+	
+	local configurationFolderPath="$_program_etcPath"/shellfire/pxe/dnsmasq
+	local hostsConfigurationFolderPath="$configurationFolderPath"/hosts
+	local dhcpConfigurationFolderPath="$configurationFolderPath"/dhcp
+	local varRunFolderPath="$_program_varPath"/run
+	local varLibFolderPath="$_program_varPath"/lib/dnsmasq
+	exec dnsmasq \
+		--conf-file="$configurationFolderPath"/dnsmasq.conf \
+		--conf-dir="$configurationFolderPath"/dnsmasq.conf.d \
+		--pid-file="$varRunFolderPath"/dnsmasq.pid \
+		--servers-file="$configurationFolderPath"/servers.conf \
+		--resolv-file="$configurationFolderPath"/resolv.conf \
+		--addn-hosts="$hostsConfigurationFolderPath"/normal.hosts \
+		--hostsdir="$hostsConfigurationFolderPath"/hosts.d \
+		--dhcp-hostsfile="$dhcpConfigurationFolderPath"/hosts.sighup.d \
+		--dhcp-hostsdir="$dhcpConfigurationFolderPath"/hosts.d \
+		--dhcp-optsfile="$dhcpConfigurationFolderPath"/opts.sighup.d \
+		--dhcp-optsdir="$dhcpConfigurationFolderPath"/opts.d \
+		--tftp-root="$varLibFolderPath"/tftp \
+		--dhcp-luascript="$configurationFolderPath"/dhcp.lua \
+		--dhcp-leasefile="$varLibFolderPath"/dhcp/leases \
+	
+	#dhcp-authoritative - allows lease database rebuild
+}	

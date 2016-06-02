@@ -1,0 +1,5 @@
+#!pxe
+echo Hello World
+echo UUID:${uuid)
+prompt "Press any key to continue boot"
+chain http://${next-server}:8080/cgi-bin/ipxe

@@ -1,0 +1,9 @@
+[submodule "etc/shellfire/paths.d"]
+	path = etc/shellfire/paths.d
+	url = https://github.com/shellfire-dev/paths.d
+[submodule "etc/shellfire/pxe/iPXE/latest"]
+	path = etc/shellfire/pxe/iPXE/latest
+	url = git://git.ipxe.org/ipxe.git
+[submodule "lib/shellfire/core"]
+	path = lib/shellfire/core
+	url = https://github.com/shellfire-dev/core.git

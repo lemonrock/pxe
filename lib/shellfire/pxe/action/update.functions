@@ -1,0 +1,62 @@
+# This file is part of pxe. It is subject to the licence terms in the COPYRIGHT file found in the top-level directory of this distribution and at https://raw.githubusercontent.com/lemonrock/pxe/master/COPYRIGHT. No part of pxe, including this file, may be copied, modified, propagated, or distributed except according to the terms contained in the COPYRIGHT file.
+# Copyright © 2014-2015 The developers of pxe. See the COPYRIGHT file in the top-level directory of this distribution and at https://raw.githubusercontent.com/lemonrock/pxe/master/COPYRIGHT.
+
+
+core_dependency_requires '*' rm curl dos2unix sed cp
+pxe_action_update_malware_hosts()
+{
+	local hostsFolderPath="$_program_etcPath"/shellfire/pxe/dnsmasq/hosts/hosts.d
+	local hostFileUrlsFilePath="$_program_etcPath"/shellfire/pxe/host-file-urls
+	
+	pushd "$hostsFolderPath"
+		set +f
+			local malwareFileName
+			for malwareFileName in *.malware.hosts
+			do
+				set -f
+				local noLongerDownloaded=true
+				local originalName="${malwareFileName%.malware.hosts}"
+
+				local name
+				local url
+				while read -r name url
+				do
+					if [ "$originalName" = "$name" ]; then
+						noLongerDownloaded=false
+						break
+					fi
+				done <"$hostFileUrlsFilePath"
+			
+				if $noLongerDownloaded; then
+					rm -rf "$malwareFileName"
+				fi
+			done
+		set -f
+	popd
+	
+	local TMP_FILE
+	local name
+	local url
+	while read -r name url
+	do
+		core_temporaryFiles_newFileToRemoveOnExit
+		# Ignore curl errors; a provider may be temporarily offline
+		core_message INFO "Downloading malware hosts list '$name' from '$url'"
+		curl --fail --silent --location "$url" >"$TMP_FILE" || continue
+		dos2unix "$TMP_FILE" 1>/dev/null 2>/dev/null
+		sed -i 's/^127.0.0.1/0.0.0.0/g' "$TMP_FILE"
+		sed -i '/ localhost$/d' "$TMP_FILE"
+		sed -i '/ broadcasthost$/d' "$TMP_FILE"
+		sed -i '/ local$/d' "$TMP_FILE"
+		sed -i '/ localhost.localdomain$/d' "$TMP_FILE"
+		sed -i '/^::1/d' "$TMP_FILE"
+		cp -f "$TMP_FILE" "$hostsFolderPath"/"$name".malware.hosts
+		# Even though we clean up tmp files at program termination, these files are potentially quite large for a temp space
+		rm "$TMP_FILE"
+	done <"$hostFileUrlsFilePath"
+}
+
+pxe_action_update_ipxe()
+{
+	pxe_utilities_prepareIPxe
+}

@@ -1,0 +1,33 @@
+[ ca ]
+default_ca             = ca_default
+
+[ ca_default ]
+dir                    = ${ENV::pxe_certificateAuthorityFolderPath}
+certificate            = ${dir}/private-pxe-certificate-authority.crt
+private_key            = ${dir}/private-pxe-certificate-authority.key
+serial                 = ${dir}/private-pxe-certificate-authority.srl
+database               = ${dir}/private-pxe-certificate-authority.idx
+certs                  = ${dir}
+new_certs_dir          = ${dir}
+default_md             = default
+policy                 = policy_anything
+preserve               = yes
+default_days           = 90
+unique_subject         = no
+
+[ policy_anything ]
+countryName            = optional
+stateOrProvinceName    = optional
+localityName           = optional
+organizationName       = optional
+organizationalUnitName = optional
+commonName             = optional
+emailAddress           = optional
+
+[ cross ]
+basicConstraints       = critical,CA:true
+keyUsage               = critical,cRLSign,keyCertSign
+
+[ codesigning ]
+keyUsage                = digitalSignature
+extendedKeyUsage        = codeSigning

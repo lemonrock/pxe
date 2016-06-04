@@ -26,7 +26,8 @@ pxe_action_hitch_start()
 	} >"$serverPemFilePath"
 	chmod 0400 "$serverPemFilePath"
 	
-	sed 's;@PEMFILE@;'"$serverPemFilePath"';g' "$pxe_hitchFilePath" >"$decryptedServerCertificateFolderPath"/hitch.conf
+	sed 's;@IPV4ADDRESS@;'"$(pxe_utilities_ourIpV4Address)"';g' "$pxe_hitchFilePath" >"$decryptedServerCertificateFolderPath"/hitch.conf
+	sed -i 's;@PEMFILE@;'"$serverPemFilePath"';g' "$decryptedServerCertificateFolderPath"/hitch.conf
 	chmod 0400 "$decryptedServerCertificateFolderPath"/hitch.conf
 	cat "$decryptedServerCertificateFolderPath"/hitch.conf >out
 	

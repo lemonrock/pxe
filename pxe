@@ -22,6 +22,7 @@ _program()
 		pxe_certificateAuthorityCertFilePath="$pxe_certificateAuthorityFolderPath"/private-pxe-certificate-authority.crt
 		pxe_certificateAuthorityKeyFilePath="$pxe_certificateAuthorityFolderPath"/private-pxe-certificate-authority.key
 		pxe_ipxe_destinationFolderPath="$_program_varPath"/lib/dnsmasq/tftp
+		pxe_ethernetInterface='eth0'
 			
 		"$functionToExecuteForAction" "$@"
     }

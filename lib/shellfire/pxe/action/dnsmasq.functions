@@ -23,7 +23,8 @@ pxe_action_dnsmasq_start()
 	pxe_utilities_runLongLived dnsmasq \
 		--conf-file="$configurationFolderPath"/dnsmasq.conf \
 		--pid-file="$(pxe_utilities_pidFilePath dnsmasq)" \
-		--tftp-root="$varLibFolderPath"/tftp
+		--tftp-root="$varLibFolderPath"/tftp \
+		--dhcp-range="$(pxe_utilities_ourIpV4Address)",proxy
 }
 
 core_usesIn pxe utilities

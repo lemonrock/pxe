@@ -78,3 +78,9 @@ pxe_utilities_start()
 	printf '%s' "$programPid" >"$pidFilePath"
 	core_message INFO "$programName is running as PID '$programPid'"
 }
+
+core_dependency_requires '*' ip awk
+pxe_utilities_ourIpV4Address()
+{
+	ip -family inet -oneline address show "$pxe_ethernetInterface" | awk '{print $4}' | awk -F'/' '{print $1}'
+}

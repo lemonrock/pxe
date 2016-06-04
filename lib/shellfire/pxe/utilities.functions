@@ -36,13 +36,23 @@ pxe_utilities_signal()
 	fi
 }
 
+core_usesIn pxe crypto
 core_dependency_requires '*' grep id make git rm mv
 core_dependency_requires '*' perl gcc ld ar rm
+# Effectively, add or update client...
 pxe_utilities_prepareIPxe()
 {
+	# clientId is probably best utilised as 'hostname'
 	local clientId="$1"
 	
 	pxe_alpine_installPackages alpine-sdk perl xz-dev
+	
+	# TODO: Get the vmlinuz image for this client if set up...
+	
+	pxe_crypto_signCode "$pxe_httpdFolderPath"/boot/vmlinuz."$clientId"
+	
+	# TODO: Or replace. Or ignore if present.
+	pxe_crypto_generateNewClientAuthenticationCertificate "$clientId"
 
 	local iPxeFolderPath="$_program_etcPath"/shellfire/pxe/iPXE
 	local currentIPxeFolderPath="$iPxeFolderPath"/current

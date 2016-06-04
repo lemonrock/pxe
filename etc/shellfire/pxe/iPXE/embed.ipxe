@@ -2,4 +2,11 @@
 echo Hello World
 echo UUID:${uuid)
 prompt "Press any key to continue boot"
+
+#imgtrust --permanent
+#dhcp
+#kernel https://${next-server}/boot/${hostname}.vmlinuz
+#imgverify vmlinuz https://${next-server}/boot/${hostname}.vmlinuz.sig
+#boot vmlinuz
+
 chain http://${next-server}:8080/cgi-bin/ipxe

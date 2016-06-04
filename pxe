@@ -12,7 +12,8 @@ _program()
 		if ! core_functions_exists "$functionToExecuteForAction"; then
 			core_exitError $core_commandLine_exitCode_SOFTWARE "No such action '$pxe_action'"
 		fi
-		
+	
+		pxe_httpdFolderPath="$_program_etcPath"/shellfire/pxe/httpd
 		pxe_openSslCertificateAuthorityCnfFilePath="$_program_etcPath"/shellfire/pxe/openssl-certificate-authority.cnf
 		pxe_certificateAuthorityFolderPath="$_program_etcPath"/shellfire/pxe/certificate-authority
 		pxe_certificatesFolderPath="$_program_etcPath"/shellfire/pxe/certificate-authority/certificates

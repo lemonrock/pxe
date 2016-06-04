@@ -22,11 +22,8 @@ pxe_action_http_start()
 	fi
 	
 	rm -rf "$pidFilePath"
-		
-	local httpdFolderPath="$_program_etcPath"/shellfire/pxe/httpd
-	(
-		pxe_utilities_runLongLived httpd -c "$httpdFolderPath"/httpd.conf -p 8080 -h "$httpdFolderPath"/root
-	)
+	
+	pxe_utilities_runLongLived httpd -c "$pxe_httpdFolderPath"/httpd.conf -p 8080 -h "$pxe_httpdFolderPath"/root
 	sleep 1
 	
 	local httpdPid="$(ps -o comm,pid | tail -n +2 | grep '^httpd ' | awk '{print $2}')"

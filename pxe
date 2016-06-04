@@ -13,10 +13,12 @@ _program()
 			core_exitError $core_commandLine_exitCode_SOFTWARE "No such action '$pxe_action'"
 		fi
 	
-		pxe_httpdFolderPath="$_program_etcPath"/shellfire/pxe/httpd
-		pxe_openSslCertificateAuthorityCnfFilePath="$_program_etcPath"/shellfire/pxe/openssl-certificate-authority.cnf
-		pxe_certificateAuthorityFolderPath="$_program_etcPath"/shellfire/pxe/certificate-authority
-		pxe_certificatesFolderPath="$_program_etcPath"/shellfire/pxe/certificate-authority/certificates
+		pxe_etcFolderPath="$_program_etcPath"/shellfire/pxe
+		pxe_httpdFolderPath="$pxe_etcFolderPath"/httpd
+		pxe_hitchFolderPath="$pxe_etcFolderPath"/hitch
+		pxe_openSslCertificateAuthorityCnfFilePath="$pxe_etcFolderPath"/openssl-certificate-authority.cnf
+		pxe_certificateAuthorityFolderPath="$pxe_etcFolderPath"/certificate-authority
+		pxe_certificatesFolderPath="$pxe_certificateAuthorityFolderPath"/certificates
 		pxe_certificateAuthorityCertFilePath="$pxe_certificateAuthorityFolderPath"/private-pxe-certificate-authority.crt
 		pxe_certificateAuthorityKeyFilePath="$pxe_certificateAuthorityFolderPath"/private-pxe-certificate-authority.key
 		pxe_ipxe_destinationFolderPath="$_program_varPath"/lib/dnsmasq/tftp
@@ -33,11 +35,11 @@ _program_commandLine_parse()
 	
 	case "$1" in
 		
-		new_certificate_authority|update_malware_hosts|update_ipxe|http_start|http_stop|dnsmasq_start|dnsmasq_reconfigure|dnsmasq_write_statistics|dnsmasq_logrotate|dnsmasq_stop)
+		new_certificate_authority|new_client_certificate|update_undionly|hitch_start|hitch_stop|httpd_start|httpd_stop|dnsmasq_start|dnsmasq_reconfigure|dnsmasq_write_statistics|dnsmasq_logrotate|dnsmasq_stop)
 			pxe_action="$1"
 			shift 1
 		;;
-		
+				
 		--help|-h)
 			:
 		;;

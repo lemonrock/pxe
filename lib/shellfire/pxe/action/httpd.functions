@@ -3,40 +3,19 @@
 
 
 core_usesIn pxe utilities
-core_dependency_requires '*' head ps tail grep rm
-pxe_action_http_start()
+core_dependency_requires '*' chmod cat cp httpd socat
+pxe_action_httpd_start()
 {	
 	if ! core_path_isReadableNonEmptyFilePath "$pxe_ipxe_destinationFolderPath"; then
 		core_message INFO "Preparing ipxe before starting httpd"
 		pxe_utilities_prepareIPxe
 	fi
 	
-	local pidFilePath="$_program_varPath"/run/httpd.pid
-	if core_path_isReadableNonEmptyFilePath "$pidFilePath"; then
-		local httpdPid="$(head -n 1 "$pidFilePath")"
-		# trailing space is delivebate
-		if ps -o pid,comm | tail -n +2 | grep -q "${httpdPid} "; then
-			core_message WARN "BusyBox httpd already running as pid '$httpdPid'; stop with  kill -9 $httpdPid && rm -rf ${pidFilePath}"
-			return 0
-		fi
-	fi
-	
-	rm -rf "$pidFilePath"
-	
-	pxe_utilities_runLongLived httpd -c "$pxe_httpdFolderPath"/httpd.conf -p 8080 -h "$pxe_httpdFolderPath"/root
-	sleep 1
-	
-	local httpdPid="$(ps -o comm,pid | tail -n +2 | grep '^httpd ' | awk '{print $2}')"
-	if [ -z "$httpdPid" ]; then
-		core_exitError $core_commandLine_exitCode_SOFTWARE "BusyBox httpd did not start"
-	fi
-	
-	printf '%s' "$httpdPid" >"$_program_varPath"/run/httpd.pid
-	core_message INFO "BusyBox httpd is running as PID '$httpdPid'"
+	pxe_utilities_start httpd -c "$pxe_httpdFolderPath"/httpd.conf -p 127.0.0.1:8080 -h "$pxe_httpdFolderPath"/root
 }
 
 core_usesIn pxe utilities
-pxe_action_http_stop()
+pxe_action_httpd_stop()
 {
 	pxe_utilities_signal httpd 'SIGINT' true
 }

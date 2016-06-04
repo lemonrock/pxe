@@ -36,45 +36,45 @@ pxe_utilities_signal()
 	fi
 }
 
-core_usesIn pxe crypto
-core_dependency_requires '*' grep id make git rm mv
-core_dependency_requires '*' perl gcc ld ar rm
-# Effectively, add or update client...
-pxe_utilities_prepareIPxe()
+pxe_utilities_pidFilePath()
 {
-	# clientId is probably best utilised as 'hostname'
-	local clientId="$1"
-	
-	pxe_alpine_installPackages alpine-sdk perl xz-dev
-	
-	# TODO: Get the vmlinuz image for this client if set up...
-	
-	pxe_crypto_signCode "$pxe_httpdFolderPath"/boot/vmlinuz."$clientId"
-	
-	# TODO: Or replace. Or ignore if present.
-	pxe_crypto_generateNewClientAuthenticationCertificate "$clientId"
+	local programName="$1"
+	printf '%s' "$_program_varPath"/run/"$programName".pid
+	if core_path_isReadableNonEmptyFilePath "$pidFilePath"; then
+		local programPid="$(head -n 1 "$pidFilePath")"
+		# trailing space is delivebate
+		if ps -o pid,comm | tail -n +2 | grep -q "${programPid} "; then
+			core_message WARN "$programName already running as pid '$programPid'; stop with  kill -9 $programPid && rm -rf ${pidFilePath}"
+		fi
+	fi
+}
 
-	local iPxeFolderPath="$_program_etcPath"/shellfire/pxe/iPXE
-	local currentIPxeFolderPath="$iPxeFolderPath"/current
-		
-	pushd "$currentIPxeFolderPath"
-		
-		make clean 1>/dev/null 2>/dev/null || true
-		git reset --hard --quiet
-		git clean -d --force --quiet -x
-		
-		pushd src
-		
-			make bin/undionly."$clientId".kpxe 1>/dev/null 2>/dev/null EMBED="$iPxeFolderPath"/embed.ipxe CERT="$pxe_certificateAuthorityCertFilePath","$pxe_certificatesFolderPath"/"$clientId".client.crt TRUST="$pxe_certificateAuthorityCertFilePath" PRIVKEY="$pxe_certificatesFolderPath"/"$clientId".client.key
-		
-		popd
-		
-		rm -rf "$pxe_ipxe_destinationFolderPath"/undionly.kpxe
-		mv "$currentIPxeFolderPath"/src/bin/undionly.kpxe "$pxe_ipxe_destinationFolderPath"
-		
-		make clean 1>/dev/null 2>/dev/null || true
-		git reset --hard --quiet
-		git clean -d --force --quiet -x
-		
-	popd
+pxe_utilities_exitIfAlreadyRunning()
+{
+	local programName="$1"
+	local pidFilePath="$(pxe_utilities_pidFilePath "$programName")"
+}
+
+core_dependency_requires '*' head ps tail grep rm sleep awk
+pxe_utilities_start()
+{
+	local programName="$1"
+	shift 1
+	
+	pxe_utilities_pidFilePath "$programName"
+	
+	local pidFilePath="$(pxe_utilities_pidFilePath "$programName")"
+	rm -rf "$pidFilePath"
+	
+	pxe_utilities_runLongLived "$programName" "$@"
+	sleep 1
+	
+	# Trailing space in grep is deliberate
+	local programPid="$(ps -o comm,pid | tail -n +2 | grep "^${programName} " | awk '{print $2}')"
+	if [ -z "$programPid" ]; then
+		core_exitError $core_commandLine_exitCode_SOFTWARE "$programName did not start"
+	fi
+	
+	printf '%s' "$programPid" >"$pidFilePath"
+	core_message INFO "$programName is running as PID '$programPid'"
 }

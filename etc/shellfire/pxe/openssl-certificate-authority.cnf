@@ -1,33 +1,94 @@
-[ ca ]
-default_ca             = ca_default
+HOME=.
+RANDFILE=$ENV::HOME/.rnd
 
-[ ca_default ]
-dir                    = ${ENV::pxe_certificateAuthorityFolderPath}
-certificate            = ${dir}/private-pxe-certificate-authority.crt
-private_key            = ${dir}/private-pxe-certificate-authority.key
-serial                 = ${dir}/private-pxe-certificate-authority.srl
-database               = ${dir}/private-pxe-certificate-authority.idx
-certs                  = ${dir}
-new_certs_dir          = ${dir}
-default_md             = default
-policy                 = policy_anything
-preserve               = yes
-default_days           = 90
-unique_subject         = no
+[ ca ]
+default_ca=CA_default
+
+[ CA_default ]
+dir=${ENV::pxe_certificateAuthorityFolderPath}
+certificate=${dir}/private-pxe-certificate-authority.crt
+private_key=${dir}/private-pxe-certificate-authority.key
+serial=${dir}/private-pxe-certificate-authority.srl
+database=${dir}/private-pxe-certificate-authority.idx
+certs=${dir}
+new_certs_dir=${dir}
+default_md=default
+policy=policy_anything
+preserve=yes
+default_days=100000
+default_crl_days=30
+default_md=default
+unique_subject=no
 
 [ policy_anything ]
-countryName            = optional
-stateOrProvinceName    = optional
-localityName           = optional
-organizationName       = optional
-organizationalUnitName = optional
-commonName             = optional
-emailAddress           = optional
+countryName=optional
+stateOrProvinceName=optional
+localityName=optional
+organizationName=optional
+organizationalUnitName=optional
+commonName=optional
+emailAddress=optional
 
 [ cross ]
-basicConstraints       = critical,CA:true
-keyUsage               = critical,cRLSign,keyCertSign
+basicConstraints=critical,CA:true
+keyUsage=critical,cRLSign,keyCertSign
 
 [ codesigning ]
-keyUsage                = digitalSignature
-extendedKeyUsage        = codeSigning
+keyUsage=digitalSignature
+extendedKeyUsage=codeSigning
+
+[ req ]
+default_bits=4096
+distinguished_name=req_distinguished_name
+attributes=req_attributes
+x509_extensions=v3_ca
+string_mask=utf8only
+req_extensions=v3_req
+
+[ req_distinguished_name ]
+countryName=UK
+countryName_default=UK
+stateOrProvinceName		= North Yorkshire
+stateOrProvinceName_default	= North Yorkshire
+localityName			= Skipton
+localityName_default=Skipton
+0.organizationName		= Stormmq IT Ltd
+0.organizationName_default	=Stormmq IT Ltd
+organizationalUnitName=PXE
+organizationalUnitName_default=PXE
+commonName=*.stormmq.com
+commonName_default=*.stormmq.com
+commonName_max=64
+emailAddress=administrator@stormmq.com
+emailAddress_default=administrator@stormmq.com
+emailAddress_max=64
+
+[ req_attributes ]
+challengePassword_min=8
+challengePassword_max	= 20
+unstructuredName		= Stormmq IT Ltd
+
+[ usr_cert ]
+basicConstraints=CA:FALSE
+nsComment="OpenSSL Generated Certificate"
+subjectKeyIdentifier=hash
+authorityKeyIdentifier=keyid,issuer
+#subjectAltName=email:copy
+#issuerAltName=issuer:copy
+
+[ v3_req ]
+basicConstraints=CA:FALSE
+keyUsage=nonRepudiation, digitalSignature, keyEncipherment
+
+[ v3_ca ]
+subjectKeyIdentifier=hash
+authorityKeyIdentifier=keyid:always,issuer
+basicConstraints=CA:true
+keyUsage=cRLSign, keyCertSign
+nsCertType=sslCA, emailCA
+subjectAltName=email:copy
+issuerAltName=issuer:copy
+
+[ crl_ext ]
+issuerAltName=issuer:copy
+authorityKeyIdentifier=keyid:always

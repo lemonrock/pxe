@@ -6,6 +6,8 @@ core_usesIn pxe utilities
 core_dependency_requires '*' id dnsmasq
 pxe_action_dnsmasq_start()
 {
+	pxe_utilities_exitIfAlreadyRunning dnsmasq
+	
 	pxe_alpine_installPackages dnsmasq
 	
 	local scriptUser="$(id -u)"

@@ -15,7 +15,7 @@ pxe_openssl_new_request()
 	local requestBaseName="$1"
 	shift 1
 	
-    _pxe_openssl -sha256 req -newkey rsa:4096 -out "$pxe_certificatesFolderPath"/"$requestBaseName".req -keyout "$pxe_certificatesFolderPath"/"$requestBaseName".key "$@"
+    _pxe_openssl req -sha256 -newkey rsa:4096 -out "$pxe_certificatesFolderPath"/"$requestBaseName".csr -keyout "$pxe_certificatesFolderPath"/"$requestBaseName".key "$@"
 }
 
 pxe_openssl_ca_sign()
@@ -23,7 +23,7 @@ pxe_openssl_ca_sign()
 	local requestBaseName="$1"
 	shift 1
 	
-	pxe_openssl_ca -in "$pxe_certificatesFolderPath"/"$requestBaseName".req -out "$pxe_certificatesFolderPath"/"$requestBaseName".crt "$@"
+	pxe_openssl_ca -in "$pxe_certificatesFolderPath"/"$requestBaseName".csr -out "$pxe_certificatesFolderPath"/"$requestBaseName".crt "$@"
 }
 
 pxe_openssl_ca_crossSign()

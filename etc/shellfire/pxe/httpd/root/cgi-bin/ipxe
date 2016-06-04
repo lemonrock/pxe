@@ -1,7 +1,6 @@
 #!/usr/bin/env sh
 
 set -e
-set -x
 set -f
 
 # QUERY_STRING environment variable should be set; we should also be able to verify REMOTE_ADDR and REQUEST_METHOD=GET and CONTENT_TYPE

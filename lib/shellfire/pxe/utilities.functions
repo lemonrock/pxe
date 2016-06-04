@@ -40,6 +40,12 @@ pxe_utilities_pidFilePath()
 {
 	local programName="$1"
 	printf '%s' "$_program_varPath"/run/"$programName".pid
+}
+
+pxe_utilities_exitIfAlreadyRunning()
+{
+	local programName="$1"
+	local pidFilePath="$(pxe_utilities_pidFilePath "$programName")"
 	if core_path_isReadableNonEmptyFilePath "$pidFilePath"; then
 		local programPid="$(head -n 1 "$pidFilePath")"
 		# trailing space is delivebate
@@ -47,12 +53,6 @@ pxe_utilities_pidFilePath()
 			core_message WARN "$programName already running as pid '$programPid'; stop with  kill -9 $programPid && rm -rf ${pidFilePath}"
 		fi
 	fi
-}
-
-pxe_utilities_exitIfAlreadyRunning()
-{
-	local programName="$1"
-	local pidFilePath="$(pxe_utilities_pidFilePath "$programName")"
 }
 
 core_dependency_requires '*' head ps tail grep rm sleep awk

@@ -3,7 +3,7 @@
 
 
 core_usesIn pxe utilities
-core_dependency_requires '*' dnsmasq
+core_dependency_requires '*' dnsmasq setcap
 pxe_action_dnsmasq_start()
 {
 	pxe_utilities_exitIfAlreadyRunning dnsmasq
@@ -20,11 +20,14 @@ pxe_action_dnsmasq_start()
 	# Might come in handy for adding in additional dhcp clients?
 	#--conf-dir="$configurationFolderPath"/dnsmasq.conf.d \
 	
+	sudo -p "Setting CAP_NET_BIND_SERVICE on dnsmasq; enter your password: " setcap -q cap_net_bind_service+ep "$(core_compatibility_which dnsmasq)"
+	
 	pxe_utilities_runLongLived dnsmasq \
-		--conf-file="$configurationFolderPath"/dnsmasq.conf \
+		--conf-file="$_program_etcPath"/shellfire/pxe/dnsmasq.conf \
 		--pid-file="$(pxe_utilities_pidFilePath dnsmasq)" \
 		--tftp-root="$varLibFolderPath"/tftp \
-		--dhcp-range="$(pxe_utilities_ourIpV4Address)",proxy
+		--dhcp-range="$(pxe_utilities_ourIpV4Address)",proxy \
+		--dhcp-leasefile="$varLibFolderPath"/dhcp/leases
 }
 
 core_usesIn pxe utilities

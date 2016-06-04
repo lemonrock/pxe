@@ -3,7 +3,7 @@
 
 
 core_usesIn pxe utilities
-core_dependency_requires '*' chmod cat cp httpd socat
+core_dependency_requires '*' chmod cat cp httpd
 pxe_action_httpd_start()
 {	
 	if ! core_path_isReadableNonEmptyFilePath "$pxe_ipxe_destinationFolderPath"; then

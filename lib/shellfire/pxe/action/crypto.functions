@@ -3,24 +3,24 @@
 
 
 core_usesIn pxe openssl
-core_dependency_requires '*' rm
 pxe_action_new_certificate_authority()
 {
 	_pxe_action_crypto_generateCertificateAuthorityCertificate
 	printf '%s\n' 1000 >"$pxe_certificateAuthorityFolderPath"/private-pxe-certificate-authority.srl
 	printf '1000' >"$pxe_certificateAuthorityFolderPath"/private-pxe-certificate-authority.idx
 	printf '%s\n' 'unique_subject = no' >"$pxe_certificateAuthorityFolderPath"/private-pxe-certificate-authority.idx.attr
+	
 	_pxe_action_crypto_generateNewServerAuthenticationCertificate
 	_pxe_action_crypto_generateNewCodeSigningCertificate
 	
-	set +f
-	rm -rf "$pxe_certificateAuthorityFolderPath"/*.old "$pxe_certificateAuthorityFolderPath"/*.pem
-	set -f
+	pxe_openssl_clean
 }
 
 pxe_action_new_client_certificate()
 {
 	_pxe_action_crypto_generateNewClientAuthenticationCertificate 'any'
+	
+	pxe_openssl_clean
 }
 
 core_dependency_requires '*' mkdir chmod openssl
@@ -35,8 +35,6 @@ _pxe_action_crypto_generateCertificateAuthorityCertificate()
 	openssl req -x509 -newkey rsa:4096 -out "$pxe_certificateAuthorityCertFilePath" -keyout "$pxe_certificateAuthorityKeyFilePath" -days 10000 -batch
 }
 
-# TODO: These will eventually need to be embedded into stunnel
-# TODO: Probably ought to store these in a client folder?
 _pxe_action_crypto_generateNewServerAuthenticationCertificate()
 {
 	printf '%s\n' "Please enter a 4 - 1023 character password for a Server Private Key"
@@ -51,12 +49,14 @@ _pxe_action_crypto_generateNewCodeSigningCertificate()
 	pxe_openssl_ca_sign 'code-signing' -extensions codesigning
 }
 
-# TODO: These will eventually need to be embedded into stunnel
-# TODO: Probably ought to store these in a client folder?
 _pxe_action_crypto_generateNewClientAuthenticationCertificate()
 {
 	local clientId="$1"
 
+	if [ -f "$pxe_certificatesFolderPath"/"$clientId".client.crt ]; then
+		core_exitError $core_commandLine_exitCode_USAGE "Client certificate for '$clientId' already exists"
+	fi
+	
 	printf '%s\n' "Please enter a 4 - 1023 character password for the client '$clientId' Private Key"
 	pxe_openssl_new_request "$clientId".client
     pxe_openssl_ca_sign "$clientId".client

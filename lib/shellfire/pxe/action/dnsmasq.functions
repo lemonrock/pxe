@@ -66,8 +66,6 @@ pxe_action_dnsmasq_start_old()
 {
 	pxe_utilities_exitIfAlreadyRunning dnsmasq
 	
-	pxe_alpine_installPackages dnsmasq
-	
 	local scriptUser="$(id -u)"
 	
 	local configurationFolderPath="$_program_etcPath"/shellfire/pxe/dnsmasq

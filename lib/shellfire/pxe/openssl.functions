@@ -51,6 +51,14 @@ pxe_openssl_removePassPhrase()
 	openssl rsa -in "$inputKeyFilePath" -out "$outputKeyFilePath"
 }
 
+core_dependency_requires '*' rm
+pxe_openssl_clean()
+{
+	set +f
+	rm -rf "$pxe_certificateAuthorityFolderPath"/*.old "$pxe_certificateAuthorityFolderPath"/*.pem
+	set -f
+}
+
 core_dependency_requires '*' openssl
 _pxe_openssl()
 {

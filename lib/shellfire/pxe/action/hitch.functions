@@ -3,30 +3,35 @@
 
 
 core_usesIn pxe utilities openssl
-core_dependency_requires '*' hitch chmod cat
+core_dependency_requires '*' hitch chmod cat sed chown mknod
 pxe_action_hitch_start()
 {
 	pxe_utilities_exitIfAlreadyRunning hitch
 	
+	local pidFilePath="$(pxe_utilities_pidFilePath hitch)"
 	local chrootFolderPath="$_program_varPath"/lib/hitch
 	
 	local TMP_FOLDER
 	core_temporaryFiles_newFolderToRemoveOnExit
 	local decryptedServerCertificateFolderPath="$TMP_FOLDER"
 	chmod 0700 "$decryptedServerCertificateFolderPath"
-	local serverPemFilePath="$pxe_certificatesFolderPath"/server.pem
+	local serverPemFilePath="$decryptedServerCertificateFolderPath"/server.pem
 	{
-		cat "$pxe_certificateAuthorityCertFilePath"
+		pxe_openssl_removePassPhrase "$pxe_certificatesFolderPath"/server.key "$decryptedServerCertificateFolderPath"/server.key
+		cat "$decryptedServerCertificateFolderPath"/server.key
+		rm "$decryptedServerCertificateFolderPath"/server.key
+		
+		#cat "$pxe_certificateAuthorityCertFilePath"
 		cat "$pxe_certificatesFolderPath"/server.crt
-		pxe_openssl_removePassPhrase openssl rsa "$pxe_certificatesFolderPath"/server.key "$pxe_certificatesFolderPath"/server.key
-		cat "$pxe_certificatesFolderPath"/server.key
-		rm "$pxe_certificatesFolderPath"/server.key
 	} >"$serverPemFilePath"
 	chmod 0400 "$serverPemFilePath"
-	chmod 0500 "$chrootFolderPath"
-		
-	local pidFilePath="$(pxe_utilities_pidFilePath "$programName")"
-	pxe_utilities_runLongLived hitch --conf="$pxe_hitchFolderPath"/hitch.conf --pidfile="$pidFilePath" --chroot="$chrootFolderPath" --pem-file="$serverPemFilePath"
+	
+	sed 's;@PEMFILE@;'"$serverPemFilePath"';g' "$pxe_hitchFilePath" >"$decryptedServerCertificateFolderPath"/hitch.conf
+	chmod 0400 "$decryptedServerCertificateFolderPath"/hitch.conf
+	cat "$decryptedServerCertificateFolderPath"/hitch.conf >out
+	
+	chmod 0500 "$decryptedServerCertificateFolderPath"
+	pxe_utilities_runLongLived hitch --config="$decryptedServerCertificateFolderPath"/hitch.conf --pidfile="$pidFilePath"
 }
 
 core_usesIn pxe utilities

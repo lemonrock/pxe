@@ -48,12 +48,12 @@ req_extensions=v3_req
 [ req_distinguished_name ]
 countryName=UK
 countryName_default=UK
-stateOrProvinceName		= North Yorkshire
-stateOrProvinceName_default	= North Yorkshire
-localityName			= Skipton
+stateOrProvinceName	=North Yorkshire
+stateOrProvinceName_default=North Yorkshire
+localityName=Skipton
 localityName_default=Skipton
-0.organizationName		= Stormmq IT Ltd
-0.organizationName_default	=Stormmq IT Ltd
+0.organizationName=Stormmq IT Ltd
+0.organizationName_default=Stormmq IT Ltd
 organizationalUnitName=PXE
 organizationalUnitName_default=PXE
 commonName=*.stormmq.com
@@ -65,8 +65,8 @@ emailAddress_max=64
 
 [ req_attributes ]
 challengePassword_min=8
-challengePassword_max	= 20
-unstructuredName		= Stormmq IT Ltd
+challengePassword_max=20
+unstructuredName=Stormmq IT Ltd
 
 [ usr_cert ]
 basicConstraints=CA:FALSE

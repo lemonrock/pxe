@@ -15,10 +15,10 @@ _program()
 	
 		pxe_etcFolderPath="$_program_etcPath"/shellfire/pxe
 		pxe_httpdFolderPath="$pxe_etcFolderPath"/httpd
-		pxe_hitchFolderPath="$pxe_etcFolderPath"/hitch
+		pxe_hitchFilePath="$pxe_etcFolderPath"/hitch.conf
 		pxe_openSslCertificateAuthorityCnfFilePath="$pxe_etcFolderPath"/openssl-certificate-authority.cnf
 		pxe_certificateAuthorityFolderPath="$pxe_etcFolderPath"/certificate-authority
-		pxe_certificatesFolderPath="$pxe_etcFolderPath"/certificates
+		pxe_certificatesFolderPath="$pxe_certificateAuthorityFolderPath"/certificates
 		pxe_certificateAuthorityCertFilePath="$pxe_certificateAuthorityFolderPath"/private-pxe-certificate-authority.crt
 		pxe_certificateAuthorityKeyFilePath="$pxe_certificateAuthorityFolderPath"/private-pxe-certificate-authority.key
 		pxe_ipxe_destinationFolderPath="$_program_varPath"/lib/dnsmasq/tftp

@@ -3,8 +3,62 @@
 
 
 core_usesIn pxe utilities
-core_dependency_requires '*' id dnsmasq
+core_dependency_requires '*' dnsmasq
 pxe_action_dnsmasq_start()
+{
+	pxe_utilities_exitIfAlreadyRunning dnsmasq
+		
+	local configurationFolderPath="$_program_etcPath"/shellfire/pxe/dnsmasq
+	local varRunFolderPath="$_program_varPath"/run
+	local varLibFolderPath="$_program_varPath"/lib/dnsmasq
+	
+	#local dhcpConfigurationFolderPath="$configurationFolderPath"/dhcp
+	#--dhcp-optsfile="$dhcpConfigurationFolderPath"/opts.sighup.d \
+	#--dhcp-optsdir="$dhcpConfigurationFolderPath"/opts.d \
+	#--dhcp-luascript="$configurationFolderPath"/dhcp.lua \
+	
+	# Might come in handy for adding in additional dhcp clients?
+	#--conf-dir="$configurationFolderPath"/dnsmasq.conf.d \
+	
+	pxe_utilities_runLongLived dnsmasq \
+		--conf-file="$configurationFolderPath"/dnsmasq.conf \
+		--pid-file="$(pxe_utilities_pidFilePath dnsmasq)" \
+		--tftp-root="$varLibFolderPath"/tftp
+}
+
+core_usesIn pxe utilities
+pxe_action_dnsmasq_reconfigure()
+{
+	pxe_utilities_signal dnsmasq 'SIGHUP' false
+}
+
+core_usesIn pxe utilities
+pxe_action_dnsmasq_write_statistics()
+{
+	pxe_utilities_signal dnsmasq 'SIGUSR1' false
+}
+
+core_usesIn pxe utilities
+pxe_action_dnsmasq_logrotate()
+{
+	pxe_utilities_signal dnsmasq 'SIGUSR2' false
+}
+
+core_usesIn pxe utilities
+pxe_action_dnsmasq_stop()
+{
+	pxe_utilities_signal dnsmasq 'SIGINT' true
+}
+
+
+
+
+
+
+
+core_usesIn pxe utilities
+core_dependency_requires '*' id dnsmasq
+pxe_action_dnsmasq_start_old()
 {
 	pxe_utilities_exitIfAlreadyRunning dnsmasq
 	
@@ -34,28 +88,4 @@ pxe_action_dnsmasq_start()
 		--dhcp-leasefile="$varLibFolderPath"/dhcp/leases \
 	
 	#dhcp-authoritative - allows lease database rebuild
-}
-
-core_usesIn pxe utilities
-pxe_action_dnsmasq_reconfigure()
-{
-	pxe_utilities_signal dnsmasq 'SIGHUP' false
-}
-
-core_usesIn pxe utilities
-pxe_action_dnsmasq_write_statistics()
-{
-	pxe_utilities_signal dnsmasq 'SIGUSR1' false
-}
-
-core_usesIn pxe utilities
-pxe_action_dnsmasq_logrotate()
-{
-	pxe_utilities_signal dnsmasq 'SIGUSR2' false
-}
-
-core_usesIn pxe utilities
-pxe_action_dnsmasq_stop()
-{
-	pxe_utilities_signal dnsmasq 'SIGINT' true
 }

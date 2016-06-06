@@ -1,12 +1,12 @@
 #!pxe
-echo Hello World
-echo UUID:${uuid)
+#echo Hello World
+#echo UUID:${uuid)
 prompt "Press any key to continue boot"
-
+cpuid --ext 29 && set arch amd64 || set arch x86
 #imgtrust --permanent
 #dhcp
 #kernel https://${next-server}/boot/${hostname}.vmlinuz
 #imgverify vmlinuz https://${next-server}/boot/${hostname}.vmlinuz.sig
 #boot vmlinuz
 
-chain https://${next-server}:8443/cgi-bin/ipxe
+#chain https://${next-server}:8443/cgi-bin/ipxe

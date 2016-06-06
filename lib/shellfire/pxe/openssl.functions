@@ -48,7 +48,7 @@ pxe_openssl_removePassPhrase()
 	local inputKeyFilePath="$1"
 	local outputKeyFilePath="$2"
 	
-	openssl rsa -in "$inputKeyFilePath" -out "$outputKeyFilePath"
+	openssl rsa -in "$inputKeyFilePath" -out "$outputKeyFilePath" 2>/dev/null
 }
 
 core_dependency_requires '*' rm

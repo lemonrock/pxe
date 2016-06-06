@@ -1,0 +1,67 @@
+# This file is part of pxe. It is subject to the licence terms in the COPYRIGHT file found in the top-level directory of this distribution and at https://raw.githubusercontent.com/lemonrock/pxe/master/COPYRIGHT. No part of pxe, including this file, may be copied, modified, propagated, or distributed except according to the terms contained in the COPYRIGHT file.
+# Copyright © 2014-2015 The developers of pxe. See the COPYRIGHT file in the top-level directory of this distribution and at https://raw.githubusercontent.com/lemonrock/pxe/master/COPYRIGHT.
+
+
+core_usesIn pxe openssl alpine
+core_dependency_requires '*' chmod cp make rm ln mv
+core_dependency_requires '*' gcc ld perl ar csplit
+# Effectively, add or update client...
+pxe_action_nbp_create()
+{
+	local clientId='any'
+	
+	pxe_alpine_installPackages alpine-sdk xz-dev
+	
+	local TMP_FOLDER
+	core_temporaryFiles_newFolderToRemoveOnExit
+	local decryptedServerCertificateFolderPath="$TMP_FOLDER"
+	chmod 0700 "$decryptedServerCertificateFolderPath"
+	
+	pxe_openssl_removePassPhrase "$pxe_certificatesFolderPath"/"$clientId".client.key "$decryptedServerCertificateFolderPath"/client.key
+	cp "$pxe_certificateAuthorityCertFilePath" "$decryptedServerCertificateFolderPath"/ca.crt
+	cp "$pxe_certificatesFolderPath"/"$clientId".client.crt "$decryptedServerCertificateFolderPath"/client.crt
+	
+	# At this point in time, we can not serve different undionly.kpxe files without re-generating dnsmasq.conf
+	# TODO: Get the vmlinuz image for this client if set up...
+	# pxe_crypto_signCode "$pxe_httpdFolderPath"/boot/vmlinuz."$clientId"
+	# pxe_crypto_generateNewClientAuthenticationCertificate "$clientId"
+	
+	_pxe_action_nbp_create_clean
+	
+	rm -rf "$pxe_iPxeCurrentFolderPath"/src/config/local/"$clientId"
+	ln -s "$pxe_iPxeConfFolderPath"/"$clientId" "$pxe_iPxeCurrentFolderPath"/src/config/local/"$clientId"
+	
+	pushd "$pxe_iPxeCurrentFolderPath"/src
+	
+		make bin/undionly.kpxe \
+			CONFIG="$clientId" \
+			EMBED="$pxe_iPxeConfFolderPath"/embed.ipxe \
+			CERT="$decryptedServerCertificateFolderPath"/ca.crt,"$decryptedServerCertificateFolderPath"/client.crt \
+			TRUST="$decryptedServerCertificateFolderPath"/ca.crt \
+			PRIVKEY="$decryptedServerCertificateFolderPath"/client.key \
+			1>/dev/null 2>/dev/null
+	popd
+		
+	rm -rf "$pxe_ipxe_destinationFolderPath"/"$clientId".undionly.kpxe
+	mv "$pxe_iPxeCurrentFolderPath"/src/bin/undionly.kpxe "$pxe_ipxe_destinationFolderPath"/"$clientId".undionly.kpxe
+	
+	_pxe_action_nbp_create_clean
+}
+
+core_dependency_requires '*' make rm git
+_pxe_action_nbp_create_clean()
+{	
+	pushd "$_program_etcPath"/shellfire/pxe/iPXE/current
+		
+		pushd src
+			
+			make clean 1>/dev/null 2>/dev/null || true
+			
+		popd
+
+		rm -rf "$pxe_iPxeCurrentFolderPath"/src/config/local
+		git reset --hard --quiet
+		git clean -d --force --quiet -x
+		
+	popd
+}

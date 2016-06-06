@@ -3,9 +3,9 @@
 
 
 // Disable MD5 and SHA1
-#undef CRYPTO_DIGEST_MD5
-#undef CRYPTO_DIGEST_SHA1
+//#undef CRYPTO_DIGEST_MD5
+//#undef CRYPTO_DIGEST_SHA1
 
 // Disable download of cross-signed certificates from iPXE website
-#undef CROSSCERT
-#define CROSSCERT ""
+//#undef CROSSCERT
+//#define CROSSCERT ""

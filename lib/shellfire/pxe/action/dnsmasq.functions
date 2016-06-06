@@ -3,7 +3,7 @@
 
 
 core_usesIn pxe utilities
-core_dependency_requires '*' dnsmasq setcap
+core_dependency_requires '*' dnsmasq awk grep getcap setcap
 pxe_action_dnsmasq_start()
 {
 	pxe_utilities_exitIfAlreadyRunning dnsmasq
@@ -20,14 +20,19 @@ pxe_action_dnsmasq_start()
 	# Might come in handy for adding in additional dhcp clients?
 	#--conf-dir="$configurationFolderPath"/dnsmasq.conf.d \
 	
-	sudo -p "Setting CAP_NET_BIND_SERVICE on dnsmasq; enter your password: " setcap -q cap_net_bind_service+ep "$(core_compatibility_which dnsmasq)"
+	local dnsMasqPath="$(core_compatibility_which dnsmasq)"
+	if ! getcap "$dnsMasqPath" | awk -F ' = ' '{print $2}' | grep -q 'cap_net_bind_service'; then
+		sudo -p "Setting CAP_NET_BIND_SERVICE on dnsmasq; enter your password: " setcap -q cap_net_bind_service+ep "$dnsMasqPath"
+	fi
 	
 	pxe_utilities_runLongLived dnsmasq \
+		--listen-address="$(pxe_utilities_ourIpV4Address)" \
 		--conf-file="$_program_etcPath"/shellfire/pxe/dnsmasq.conf \
 		--pid-file="$(pxe_utilities_pidFilePath dnsmasq)" \
 		--tftp-root="$varLibFolderPath"/tftp \
 		--dhcp-range="$(pxe_utilities_ourIpV4Address)",proxy \
-		--dhcp-leasefile="$varLibFolderPath"/dhcp/leases
+		--dhcp-leasefile="$varLibFolderPath"/dhcp/leases \
+		--dhcp-option=66,'"'"$(pxe_utilities_ourIpV4Address)"'"'
 }
 
 core_usesIn pxe utilities
@@ -37,7 +42,7 @@ pxe_action_dnsmasq_reconfigure()
 }
 
 core_usesIn pxe utilities
-pxe_action_dnsmasq_write_statistics()
+pxe_action_dnsmasq_statistics()
 {
 	pxe_utilities_signal dnsmasq 'SIGUSR1' false
 }

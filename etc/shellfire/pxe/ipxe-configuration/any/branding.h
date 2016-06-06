@@ -3,8 +3,8 @@
 
 
 #undef PRODUCT_NAME
-#define PRODUCT_NAME "Lemonrock pxe"
+#define PRODUCT_NAME "StormMQ iPXE"
 #undef PRODUCT_URI
 #define PRODUCT_URI "https://github.com/lemonrock/pxe"
 #undef PRODUCT_TAG_LINE
-#define PRODUCT_TAG_LINE "-"
+#define PRODUCT_TAG_LINE ""

@@ -1,12 +1,101 @@
-#!pxe
-#echo Hello World
-#echo UUID:${uuid)
-prompt "Press any key to continue boot"
-cpuid --ext 29 && set arch amd64 || set arch x86
-#imgtrust --permanent
-#dhcp
-#kernel https://${next-server}/boot/${hostname}.vmlinuz
-#imgverify vmlinuz https://${next-server}/boot/${hostname}.vmlinuz.sig
-#boot vmlinuz
+#!ipxe
+set esc:hex 1b
+set boldon ${esc:string}[1m
+set boldoff ${esc:string}[22m
+set cls:hex 1b:5b:4a
+set cls ${cls:string}
+set space:hex 20:20
+set space ${space:string}
+set fg_red ${esc:string}[31m
+set fg_gre ${esc:string}[32m
+set fg_cya ${esc:string}[36m
+set fg_whi ${esc:string}[37m
 
-#chain https://${next-server}:8443/cgi-bin/ipxe
+:start
+echo ${cls}
+cpuid --ext 29 && set arch x86_64 || set arch i386
+goto menu
+
+:menu
+menu Menu
+item --gap Network Booting:
+item dhcpv4_and_boot ${space} DHCPv4 and Boot from Network
+item dhcpv4_and_boot ${space} Boot from Network
+item --gap Configuration:
+item config ${space} All Configuration
+item dhcp_ipv4_network ${space} DHCP IPv4 network configuration
+item dhcp_ipv6_network ${space} DHCP IPv6 network configuration
+item manual_network ${space} Manual network configuration
+item --key 0x02 debug ${space} iPXE Debug Shell (Ctrl-B)
+item --gap Boot Alternatives:
+item netbootxyz ${space} Use netboot.xyz (over HTTP)
+item retry ${space} Reset all Settings and Start Over
+item localboot ${space} Boot to local drive
+item
+item exit Exit StormMQ iPXE (Try next boot device, if any)
+choose --default boot --timeout 3000 menu_choice || exit
+goto ${menu_choice}
+
+:dhcpv4_and_boot
+#ifconf --configurator ipv6 ||
+ifconf --configurator dhcp && goto boot ||
+echo ${fg_red}Boot DHCP failed, waiting 5 seconds (Ctrl-C to interrupt)
+sleep 5
+goto menu
+
+:boot
+chain --autofree https://${proxydhcp/dhcp-server}/cgi-bin/ipxe ||
+echo ${fg_red}Boot Chain failed, waiting 5 seconds (Ctrl-C to interrupt)
+sleep 5
+goto menu
+
+:config
+config
+goto menu
+
+:netbootxyz
+echo Attempting chainload of netboot.xyz's menu.ipxe...
+echo Will timeout if DHCP / Network not properly configured
+chain --timeout 10000 --autofree http://boot.netboot.xyz/menu.ipxe ||
+echo ${fg_red}netboot.xyz load failed, waiting 5 seconds (Ctrl-C to interrupt)
+goto menu
+
+:localboot
+exit
+
+:dhcp_ipv4_network
+echo Trying DHCP IPv4 configuration
+ifconf --configurator dhcp ||
+goto menu
+
+:dhcp_ipv6_network
+echo Trying DHCP IPv6 configuration"
+ifconf --configurator ipv6 ||
+goto menu
+
+:manual_network
+echo ========== Network Configuration ==========
+echo Available interfaces:-
+ifstat
+imgfree
+echo -n Set network interface number [0 for net0, defaults to 0]: ${} && read interface-number
+isset ${interface-number} || set interface-number 0
+echo -n IP: && read net${interface-number}/ip
+echo -n Subnet mask: && read net${interface-number}/netmask
+echo -n Gateway: && read net${interface-number}/gateway
+echo -n DNS: && read dns
+ifopen net${interface-number}
+goto menu || goto menu
+
+:retry
+echo Retrying boot
+goto start
+
+:debug
+help
+echo Type "exit" to return to menu
+shell
+goto menu
+
+:exit
+exit

@@ -7,7 +7,10 @@
 // Enable IPv6 support
 #define NET_PROTO_IPV6
 
-#undef DOWNLOAD_PROTO_HTTP
+// Disable Fibre Channel
+#undef NET_PROTO_FCOE
+
+//#undef DOWNLOAD_PROTO_HTTP
 #undef DOWNLOAD_PROTO_TFTP
 #define DOWNLOAD_PROTO_HTTPS
 
@@ -20,22 +23,40 @@
 #undef CRYPTO_80211_WEP
 #undef CRYPTO_80211_WPA
 #undef CRYPTO_80211_WPA2
-	
+
 // Disable script support for Inifiniband, Wireleess, Sanboot, Fibre Channel
 #undef IBMGMT_CMD
 #undef IWMGMT_CMD
 #undef SANBOOT_CMD
 #undef FCMGMT_CMD
 
-// Enable script support for hashes, imgtrust and reboot
+// Enable script support for hashes, imgtrust, reboot, neighbour, ipstat, ping, nslookup commands
 #define DIGEST_CMD
 #define IMAGE_TRUST_CMD
-#define REBOOT_CMD
+#define NEIGHBOUR_CMD
+#define IPSTAT_CMD
+#define PING_CMD
+#define NSLOOKUP_CMD
+
+// Disable script support for useless things
+#undef LOTEST_CMD
+#undef PROFSTAT_CMD
+#undef TIME_CMD
+#undef VLAN_CMD
+
+// Disable script support for mucking with the console - it can cause more harm than good under serial
+#undef CONSOLE_CMD
+#undef IMAGE_PNM
+#undef IMAGE_PNG
+
+// Disable script support for things that don't work reliably
+#undef REBOOT_CMD
+#undef POWEROFF_CMD
 
 // Disable Infiniband VNICs
 #undef VNIC_IPOIB
 
-// defaults/pcbios.h overrides
+//defaults/pcbios.h overrides
 #undef SANBOOT_PROTO_ISCSI
 #undef SANBOOT_PROTO_AOE
 #undef SANBOOT_PROTO_IB_SRP
@@ -45,7 +66,7 @@
 #undef IMAGE_MULTIBOOT
 #undef IMAGE_PXE
 
-// defaults/efi.h overrides
+//defaults/efi.h overrides
 #undef UACCESS_EFI
 #undef IOMAP_VIRT
 #undef PCIAPI_EFI
@@ -62,7 +83,7 @@
 #undef IMAGE_EFI
 #undef USB_EFI
 
-// defaults/linux.h overrides
+//defaults/linux.h overrides
 #undef CONSOLE_LINUX
 #undef TIMER_LINUX
 #undef UACCESS_LINUX
@@ -77,7 +98,5 @@
 #undef DRIVERS_LINUX
 #undef IMAGE_SCRIPT
 
-#undef ROM_BANNER_TIMEOUT
-#define ROM_BANNER_TIMEOUT 0
 #undef BANNER_TIMEOUT
 #define BANNER_TIMEOUT 30

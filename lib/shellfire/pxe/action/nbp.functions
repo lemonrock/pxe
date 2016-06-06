@@ -30,16 +30,18 @@ pxe_action_nbp_create()
 	
 	rm -rf "$pxe_iPxeCurrentFolderPath"/src/config/local/"$clientId"
 	ln -s "$pxe_iPxeConfFolderPath"/"$clientId" "$pxe_iPxeCurrentFolderPath"/src/config/local/"$clientId"
+	rm -rf "$pxe_iPxeCurrentFolderPath"/src/config/local/branding.h
+	ln -s "$clientId"/branding.h "$pxe_iPxeCurrentFolderPath"/src/config/local/branding.h
 	
 	pushd "$pxe_iPxeCurrentFolderPath"/src
 	
-		make bin/undionly.kpxe \
-			CONFIG="$clientId" \
-			EMBED="$pxe_iPxeConfFolderPath"/embed.ipxe \
-			CERT="$decryptedServerCertificateFolderPath"/ca.crt,"$decryptedServerCertificateFolderPath"/client.crt \
-			TRUST="$decryptedServerCertificateFolderPath"/ca.crt \
-			PRIVKEY="$decryptedServerCertificateFolderPath"/client.key \
-			1>/dev/null 2>/dev/null
+		 make bin/undionly.kpxe \
+		 	CONFIG="$clientId" \
+		 	EMBED="$pxe_iPxeConfFolderPath"/embed.ipxe \
+		 	CERT="$decryptedServerCertificateFolderPath"/ca.crt,"$decryptedServerCertificateFolderPath"/client.crt \
+		 	TRUST="$decryptedServerCertificateFolderPath"/ca.crt \
+		 	PRIVKEY="$decryptedServerCertificateFolderPath"/client.key
+		 	#1>/dev/null 2>/dev/null
 	popd
 		
 	rm -rf "$pxe_ipxe_destinationFolderPath"/"$clientId".undionly.kpxe
@@ -50,7 +52,11 @@ pxe_action_nbp_create()
 
 core_dependency_requires '*' make rm git
 _pxe_action_nbp_create_clean()
-{	
+{
+	if ! $pxe_nbp_create_clean; then
+		return 0
+	fi
+	
 	pushd "$_program_etcPath"/shellfire/pxe/iPXE/current
 		
 		pushd src

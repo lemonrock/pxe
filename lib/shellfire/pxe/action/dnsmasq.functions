@@ -3,7 +3,7 @@
 
 
 core_usesIn pxe utilities
-core_dependency_requires '*' dnsmasq awk grep getcap setcap
+core_dependency_requires '*' dnsmasq
 pxe_action_dnsmasq_start()
 {
 	pxe_utilities_exitIfAlreadyRunning dnsmasq
@@ -12,17 +12,11 @@ pxe_action_dnsmasq_start()
 	local varRunFolderPath="$_program_varPath"/run
 	local varLibFolderPath="$_program_varPath"/lib/dnsmasq
 	
-	#local dhcpConfigurationFolderPath="$configurationFolderPath"/dhcp
-	#--dhcp-optsfile="$dhcpConfigurationFolderPath"/opts.sighup.d \
-	#--dhcp-optsdir="$dhcpConfigurationFolderPath"/opts.d \
-	#--dhcp-luascript="$configurationFolderPath"/dhcp.lua \
-	
-	# Might come in handy for adding in additional dhcp clients?
-	#--conf-dir="$configurationFolderPath"/dnsmasq.conf.d \
-	
-	local dnsMasqPath="$(core_compatibility_which dnsmasq)"
-	if ! getcap "$dnsMasqPath" | awk -F ' = ' '{print $2}' | grep -q 'cap_net_bind_service'; then
-		sudo -p "Setting CAP_NET_BIND_SERVICE on dnsmasq; enter your password: " setcap -q cap_net_bind_service+ep "$dnsMasqPath"
+	pxe_utilities_setCapNetBindService dnsmasq
+
+	if ! core_path_isReadableNonEmptyFilePath "$pxe_ipxe_destinationFolderPath"; then
+		core_message INFO "Preparing ipxe before starting httpd"
+		pxe_utilities_prepareIPxe
 	fi
 	
 	pxe_utilities_runLongLived dnsmasq \

@@ -8,3 +8,9 @@
 // Enable encrypted syslog console
 //#define CONSOLE_SYSLOGS
 //#define LOG_LEVEL LOG_ALL
+
+// Display DEBUG level log messages on the console
+#undef LOG_LEVEL
+#define LOG_LEVEL LOG_ALL
+#undef CONSOLE_PCBIOS
+#define CONSOLE_PCBIOS CONSOLE_USAGE_ALL

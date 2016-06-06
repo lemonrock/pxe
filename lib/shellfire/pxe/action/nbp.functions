@@ -40,7 +40,8 @@ pxe_action_nbp_create()
 		 	EMBED="$pxe_iPxeConfFolderPath"/embed.ipxe \
 		 	CERT="$decryptedServerCertificateFolderPath"/ca.crt,"$decryptedServerCertificateFolderPath"/client.crt \
 		 	TRUST="$decryptedServerCertificateFolderPath"/ca.crt \
-		 	PRIVKEY="$decryptedServerCertificateFolderPath"/client.key
+		 	PRIVKEY="$decryptedServerCertificateFolderPath"/client.key \
+			DEBUG=tls
 		 	#1>/dev/null 2>/dev/null
 	popd
 		

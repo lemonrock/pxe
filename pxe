@@ -108,6 +108,11 @@ _program_commandLine_parse()
 			esac
 		;;
 		
+		start|stop|restart)
+			pxe_action=all_"$1"
+			shift 1
+		;;
+		
 		new_certificate_authority|new_client_certificate)
 			pxe_action="$1"
 			shift 1

@@ -32,6 +32,7 @@ pxe_action_hitch_start()
 	cat "$decryptedServerCertificateFolderPath"/hitch.conf >out
 	
 	chmod 0500 "$decryptedServerCertificateFolderPath"
+	pxe_utilities_setCapNetBindService hitch
 	pxe_utilities_runLongLived hitch --config="$decryptedServerCertificateFolderPath"/hitch.conf --pidfile="$pidFilePath"
 }
 

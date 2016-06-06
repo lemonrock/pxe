@@ -6,11 +6,6 @@ core_usesIn pxe utilities
 core_dependency_requires '*' chmod cat cp httpd
 pxe_action_httpd_start()
 {	
-	if ! core_path_isReadableNonEmptyFilePath "$pxe_ipxe_destinationFolderPath"; then
-		core_message INFO "Preparing ipxe before starting httpd"
-		pxe_utilities_prepareIPxe
-	fi
-	
 	pxe_utilities_start httpd -c "$pxe_httpdFolderPath"/httpd.conf -p 127.0.0.1:8080 -h "$pxe_httpdFolderPath"/root
 }
 

@@ -55,13 +55,22 @@ pxe_utilities_exitIfAlreadyRunning()
 	fi
 }
 
+core_dependency_requires '*' awk grep getcap setcap
+pxe_utilities_setCapNetBindService()
+{
+	local binaryOnPathName="$1"
+	
+	local applicationPath="$(core_compatibility_which "$binaryOnPathName")"
+	if ! getcap "$applicationPath" | awk -F ' = ' '{print $2}' | grep -q 'cap_net_bind_service'; then
+		sudo -p "Setting CAP_NET_BIND_SERVICE on '$binaryOnPathName'; enter your password: " setcap -q cap_net_bind_service+ep "$applicationPath"
+	fi
+}
+
 core_dependency_requires '*' head ps tail grep rm sleep awk
 pxe_utilities_start()
 {
 	local programName="$1"
 	shift 1
-	
-	pxe_utilities_pidFilePath "$programName"
 	
 	local pidFilePath="$(pxe_utilities_pidFilePath "$programName")"
 	rm -rf "$pidFilePath"

@@ -19,7 +19,7 @@ goto menu
 :menu
 menu Menu
 item --gap Network Booting:
-item dhcpv4_and_boot ${space} DHCPv4 and Boot from Network
+item dhcpv4_and_boot ${space} Configure DHCPv4 and Boot from Network
 item dhcpv4_and_boot ${space} Boot from Network
 item --gap Configuration:
 item config ${space} All Configuration

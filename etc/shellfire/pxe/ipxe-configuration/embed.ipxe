@@ -25,6 +25,9 @@ item --gap Secure Network Booting:
 item dhcpv4_and_boot_default ${space} Configure DHCPv4 and Boot
 item dhcpv4_and_boot_ipxe ${space} Configure DHCPv4 and Boot iPXE Linux
 item dhcpv4_and_boot_netbootxyz ${space} Configure DHCPv4 and Boot netboot.xyz
+item --gap Insecure Network Booting:
+item dhcpv4_and_boot_salstar ${space} Configure DHCPv4 and Boot Salstar (INSECURE)
+# Insecurity can be fixed by adding Let's Encrypt TLS CA cert
 item --gap Configuration:
 item config ${space} All Configuration
 item dhcp_ipv4_network ${space} DHCP IPv4 network configuration
@@ -51,6 +54,10 @@ goto boot
 set boot_url https://boot.netboot.xyz/menu.ipxe
 goto boot
 
+:set_boot_url_salstar
+set boot_url http://boot.salstar.sk/menu.ipxe
+goto boot
+
 :dhcpv4_and_boot_default
 set boot_url_callback set_boot_url_default
 goto dhcpv4_and_boot
@@ -61,6 +68,10 @@ goto dhcpv4_and_boot
 
 :dhcpv4_and_boot_netbootxyz
 set boot_url_callback set_boot_url_netbootxyz
+goto dhcpv4_and_boot
+
+:dhcpv4_and_boot_salstar
+set boot_url_callback set_boot_url_salstar
 goto dhcpv4_and_boot
 
 :dhcpv4_and_boot

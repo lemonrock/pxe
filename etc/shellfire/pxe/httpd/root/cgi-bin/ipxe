@@ -11,7 +11,7 @@ print_header()
 	local headerName="$1"
 	local headerValue="$2"
 	
-	printf '%s:%s\n' "$headerName:$headerValue"
+	printf '%s: %s\n' "$headerName:$headerValue"
 }
 
 print_header_contentType()

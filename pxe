@@ -17,13 +17,13 @@ _program()
 		pxe_httpdFolderPath="$pxe_etcFolderPath"/httpd
 		pxe_hitchFilePath="$pxe_etcFolderPath"/hitch.conf
 		pxe_openSslCertificateAuthorityCnfFilePath="$pxe_etcFolderPath"/openssl-certificate-authority.cnf
-		pxe_certificateAuthorityFolderPath="$pxe_etcFolderPath"/certificate-authority
+		pxe_certificateAuthorityFolderPath="$_program_varPath"/lib/certificate-authority
 		pxe_certificatesFolderPath="$pxe_certificateAuthorityFolderPath"/certificates
 		pxe_certificateAuthorityCertFilePath="$pxe_certificateAuthorityFolderPath"/private-pxe-certificate-authority.crt
 		pxe_certificateAuthorityKeyFilePath="$pxe_certificateAuthorityFolderPath"/private-pxe-certificate-authority.key
 		pxe_tftpRootFolderPath="$_program_varPath"/lib/dnsmasq/tftp
 		pxe_ethernetInterface='eth0'
-		pxe_iPxeConfFolderPath="$_program_etcPath"/shellfire/pxe/ipxe-configuration
+		pxe_iPxeConfFolderPath="$_program_varPath"/shellfire/pxe/ipxe-configuration
 		
 		
 		pxe_iPxeCurrentFolderPath="$_program_etcPath"/shellfire/pxe/iPXE/current
@@ -115,7 +115,7 @@ _program_commandLine_parse()
 			shift 1
 		;;
 		
-		x509|new_client_certificate)
+		x509)
 			pxe_action="$1"
 			shift 1
 		;;

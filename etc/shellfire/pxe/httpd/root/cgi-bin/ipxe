@@ -3,9 +3,6 @@
 set -e
 set -f
 
-# QUERY_STRING environment variable should be set; we should also be able to verify REMOTE_ADDR and REQUEST_METHOD=GET and CONTENT_TYPE
-# REMOTE_ADDR should be enough to serve up a kernel / initrd and set command line options
-
 print_header()
 {
 	local headerName="$1"
@@ -149,7 +146,7 @@ execute_ipxe()
 	validate_thereIsNoRequestMessageBody
 
 	return_plaintext "#!ipxe
-chain http://boot.ipxe.org/demo/boot.php
+chain https://boot.ipxe.org/demo/boot.php
 "
 }
 

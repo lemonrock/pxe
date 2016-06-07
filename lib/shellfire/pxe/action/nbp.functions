@@ -3,7 +3,7 @@
 
 
 core_usesIn pxe openssl alpine
-core_dependency_requires '*' chmod cp make rm ln mv
+core_dependency_requires '*' chmod cp make rm ln find tr mv
 core_dependency_requires '*' gcc ld perl ar csplit
 pxe_action_nbp()
 {
@@ -27,16 +27,19 @@ pxe_action_nbp()
 	rm -rf "$pxe_iPxeCurrentFolderPath"/src/config/local/branding.h
 	ln -s "$clientId"/branding.h "$pxe_iPxeCurrentFolderPath"/src/config/local/branding.h
 	
-	pushd "$pxe_iPxeCurrentFolderPath"/src
+	local trustedCertificateAuthorities="$(find /usr/share/ca-certificates/mozilla -type f -name '*.crt' | tr '\n' ',')"
 	
+	pushd "$pxe_iPxeCurrentFolderPath"/src
+		
 		 make bin/undionly.kpxe \
 		 	CONFIG="$clientId" \
 		 	EMBED="$pxe_iPxeConfFolderPath"/embed.ipxe \
-		 	CERT="$decryptedServerCertificateFolderPath"/ca.crt,"$decryptedServerCertificateFolderPath"/client.crt \
-		 	TRUST="$decryptedServerCertificateFolderPath"/ca.crt \
+		 	CERT="${trustedCertificateAuthorities}${decryptedServerCertificateFolderPath}"/ca.crt,"$decryptedServerCertificateFolderPath"/client.crt \
+		 	TRUST="${trustedCertificateAuthorities}$decryptedServerCertificateFolderPath"/ca.crt \
 		 	PRIVKEY="$decryptedServerCertificateFolderPath"/client.key \
 			DEBUG=tls \
 		 	1>/dev/null 2>/dev/null
+		 
 	popd
 		
 	rm -rf "$pxe_tftpRootFolderPath"/"$clientId".undionly.kpxe

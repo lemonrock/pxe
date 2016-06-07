@@ -18,9 +18,10 @@ goto menu
 
 :menu
 menu Menu
-item --gap Network Booting:
-item dhcpv4_and_boot ${space} Configure DHCPv4 and Boot from Network
-item dhcpv4_and_boot ${space} Boot from Network
+item --gap Secure Network Booting:
+item dhcpv4_and_boot_default ${space} Configure DHCPv4 and Boot
+item dhcpv4_and_boot_ipxe ${space} Configure DHCPv4 and Boot iPXE Linux
+item dhcpv4_and_boot_netbootxyz ${space} Configure DHCPv4 and Boot netboot.xyz
 item --gap Configuration:
 item config ${space} All Configuration
 item dhcp_ipv4_network ${space} DHCP IPv4 network configuration
@@ -28,36 +29,51 @@ item dhcp_ipv6_network ${space} DHCP IPv6 network configuration
 item manual_network ${space} Manual network configuration
 item --key 0x02 debug ${space} iPXE Debug Shell (Ctrl-B)
 item --gap Boot Alternatives:
-item netbootxyz ${space} Use netboot.xyz (over HTTP)
 item retry ${space} Reset all Settings and Start Over
 item localboot ${space} Boot to local drive
 item
 item exit Exit StormMQ iPXE (Try next boot device, if any)
-choose --default boot --timeout 3000 menu_choice || exit
+choose --default dhcpv4_and_boot_default --timeout 3000 menu_choice || exit
 goto ${menu_choice}
 
+:set_boot_url_default
+set boot_url https://${proxydhcp/dhcp-server}/cgi-bin/ipxe
+goto boot
+
+:set_boot_url_ipxe
+set boot_url https://boot.ipxe.org/demo/boot.php
+goto boot
+
+:set_boot_url_netbootxyz
+set boot_url https://boot.netboot.xyz/menu.ipxe
+goto boot
+
+:dhcpv4_and_boot_default
+set boot_url_callback set_boot_url_default
+goto dhcpv4_and_boot
+
+:dhcpv4_and_boot_ipxe
+set boot_url_callback set_boot_url_ipxe
+goto dhcpv4_and_boot
+
+:dhcpv4_and_boot_netbootxyz
+set boot_url_callback set_boot_url_netbootxyz
+goto dhcpv4_and_boot
+
 :dhcpv4_and_boot
-#ifconf --configurator ipv6 ||
-ifconf --configurator dhcp && goto boot ||
-echo ${fg_red}Boot DHCP failed, waiting 5 seconds (Ctrl-C to interrupt)
+ifconf --configurator dhcp && goto ${boot_url_callback} ||
+echo ${fg_red}Boot DHCPv4 failed, waiting 5 seconds (Ctrl-C to interrupt)
 sleep 5
 goto menu
 
 :boot
-chain --autofree https://${proxydhcp/dhcp-server}/cgi-bin/ipxe ||
+chain --autofree ${boot_url} ||
 echo ${fg_red}Boot Chain failed, waiting 5 seconds (Ctrl-C to interrupt)
 sleep 5
 goto menu
 
 :config
 config
-goto menu
-
-:netbootxyz
-echo Attempting chainload of netboot.xyz's menu.ipxe...
-echo Will timeout if DHCP / Network not properly configured
-chain --timeout 10000 --autofree http://boot.netboot.xyz/menu.ipxe ||
-echo ${fg_red}netboot.xyz load failed, waiting 5 seconds (Ctrl-C to interrupt)
 goto menu
 
 :localboot

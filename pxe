@@ -121,6 +121,48 @@ _program_commandLine_parse()
 		x509)
 			pxe_action="$1"
 			shift 1
+			
+			# Will only work on Alpine Linux
+			pxe_capath_default='/usr/share/ca-certificates/mozilla'
+			
+			_program_commandLine_optionExists()
+			{
+				case "$optionName" in
+					
+					c|capath)
+						echo 'yes'
+					;;
+					
+					*)
+						echo 'no'
+					;;
+					
+				esac
+			}
+			
+			_program_commandLine_processOptionWithArgument()
+			{
+				case "$optionName" in
+					
+					c|capath)
+						core_validate_folderPathReadableAndSearchable $core_commandLine_exitCode_USAGE 'option' "$optionNameIncludingHyphens" "$optionValue"
+						pxe_capath="$optionValue"
+					;;
+					
+				esac
+			}
+			
+			_program_commandLine_validate()
+			{
+				if core_variable_isUnset pxe_capath; then
+					pxe_capath="$pxe_capath_default"
+				fi
+				core_validate_folderPathReadableAndSearchable $core_commandLine_exitCode_CONFIG 'configuration setting' 'pxe_capath' "$pxe_nbp_clean"
+		
+				# See https://curl.haxx.se/docs/caextract.html ; also downloadable as a bundle from https://curl.haxx.se/ca/cacert.pem
+				
+				pxe_trustedCertificateAuthoritiesFolderPath="$pxe_capath"
+			}
 		;;
 		
 		nbp)

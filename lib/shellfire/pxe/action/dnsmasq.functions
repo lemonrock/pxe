@@ -14,7 +14,7 @@ pxe_action_dnsmasq_start()
 	
 	pxe_utilities_setCapNetBindService dnsmasq
 
-	if ! core_path_isReadableNonEmptyFilePath "$pxe_ipxe_destinationFolderPath"; then
+	if ! core_path_isReadableNonEmptyFilePath "$pxe_tftpRootFolderPath"; then
 		core_message INFO "Preparing ipxe before starting httpd"
 		pxe_utilities_prepareIPxe
 	fi

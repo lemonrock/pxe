@@ -21,11 +21,13 @@ _program()
 		pxe_certificatesFolderPath="$pxe_certificateAuthorityFolderPath"/certificates
 		pxe_certificateAuthorityCertFilePath="$pxe_certificateAuthorityFolderPath"/private-pxe-certificate-authority.crt
 		pxe_certificateAuthorityKeyFilePath="$pxe_certificateAuthorityFolderPath"/private-pxe-certificate-authority.key
-		pxe_ipxe_destinationFolderPath="$_program_varPath"/lib/dnsmasq/tftp
+		pxe_tftpRootFolderPath="$_program_varPath"/lib/dnsmasq/tftp
 		pxe_ethernetInterface='eth0'
 		pxe_iPxeConfFolderPath="$_program_etcPath"/shellfire/pxe/ipxe-configuration
+		
+		
 		pxe_iPxeCurrentFolderPath="$_program_etcPath"/shellfire/pxe/iPXE/current
-			
+		
 		"$functionToExecuteForAction" "$@"
     }
 }

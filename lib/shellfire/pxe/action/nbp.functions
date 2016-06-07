@@ -45,8 +45,8 @@ pxe_action_nbp_create()
 		 	#1>/dev/null 2>/dev/null
 	popd
 		
-	rm -rf "$pxe_ipxe_destinationFolderPath"/"$clientId".undionly.kpxe
-	mv "$pxe_iPxeCurrentFolderPath"/src/bin/undionly.kpxe "$pxe_ipxe_destinationFolderPath"/"$clientId".undionly.kpxe
+	rm -rf "$pxe_tftpRootFolderPath"/"$clientId".undionly.kpxe
+	mv "$pxe_iPxeCurrentFolderPath"/src/bin/undionly.kpxe "$pxe_tftpRootFolderPath"/"$clientId".undionly.kpxe
 	
 	_pxe_action_nbp_create_clean
 }

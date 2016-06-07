@@ -141,20 +141,13 @@ extract_value_from_query_string()
 	local keyValuePair
 	local first=true
 	for keyValuePair in "$@"
-	do
-		if $first; then
-			local actualKey='?'"$key"
-			first=false
-		else
-			local actualKey="$key"
-		fi
-		
+	do	
 		local foundKey
 		local value
 		IFS='=' read -r foundKey value <<-EOF
 			${keyValuePair}
 		EOF
-		if [ "$foundKey" = "$actualKey" ]; then
+		if [ "$foundKey" = "$key" ]; then
 			extract_value_from_query_string_RESULT="$value"
 			return 0
 		fi

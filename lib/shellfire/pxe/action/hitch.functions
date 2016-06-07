@@ -3,7 +3,7 @@
 
 
 core_usesIn pxe utilities openssl
-core_dependency_requires '*' hitch chmod cat sed chown mknod
+core_dependency_requires '*' hitch chmod cat sed chown mknod rm
 pxe_action_hitch_start()
 {
 	pxe_utilities_exitIfAlreadyRunning hitch
@@ -29,11 +29,14 @@ pxe_action_hitch_start()
 	sed 's;@IPV4ADDRESS@;'"$(pxe_utilities_ourIpV4Address)"';g' "$pxe_hitchFilePath" >"$decryptedServerCertificateFolderPath"/hitch.conf
 	sed -i 's;@PEMFILE@;'"$serverPemFilePath"';g' "$decryptedServerCertificateFolderPath"/hitch.conf
 	chmod 0400 "$decryptedServerCertificateFolderPath"/hitch.conf
-	cat "$decryptedServerCertificateFolderPath"/hitch.conf >out
 	
 	chmod 0500 "$decryptedServerCertificateFolderPath"
-	pxe_utilities_setCapNetBindService hitch
+	pxe_action_setcap_hitch
 	pxe_utilities_runLongLived hitch --config="$decryptedServerCertificateFolderPath"/hitch.conf --pidfile="$pidFilePath"
+	
+	pxe_utilities_postStartForProgramsThatCreateTheirOwnPidFile hitch
+	chmod 0700 "$decryptedServerCertificateFolderPath"
+	rm -rf "$decryptedServerCertificateFolderPath"
 }
 
 core_usesIn pxe utilities

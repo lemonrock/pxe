@@ -3,6 +3,7 @@
 
 
 core_usesIn pxe utilities
+core_usesIn pxe/action setcap
 core_dependency_requires '*' dnsmasq
 pxe_action_dnsmasq_start()
 {
@@ -12,7 +13,6 @@ pxe_action_dnsmasq_start()
 	local varRunFolderPath="$_program_varPath"/run
 	local varLibFolderPath="$_program_varPath"/lib/dnsmasq
 	
-	pxe_utilities_setCapNetBindService dnsmasq
 
 	if ! core_path_isReadableNonEmptyFilePath "$pxe_tftpRootFolderPath"; then
 		core_message INFO "Preparing ipxe before starting httpd"
@@ -27,6 +27,8 @@ pxe_action_dnsmasq_start()
 		--dhcp-range="$(pxe_utilities_ourIpV4Address)",proxy \
 		--dhcp-leasefile="$varLibFolderPath"/dhcp/leases \
 		--dhcp-option=66,'"'"$(pxe_utilities_ourIpV4Address)"'"'
+	
+	pxe_utilities_postStartForProgramsThatCreateTheirOwnPidFile dnsmasq
 }
 
 core_usesIn pxe utilities
@@ -51,42 +53,4 @@ core_usesIn pxe utilities
 pxe_action_dnsmasq_stop()
 {
 	pxe_utilities_signal dnsmasq 'SIGINT' true
-}
-
-
-
-
-
-
-
-core_usesIn pxe utilities
-core_dependency_requires '*' id dnsmasq
-pxe_action_dnsmasq_start_old()
-{
-	pxe_utilities_exitIfAlreadyRunning dnsmasq
-	
-	local scriptUser="$(id -u)"
-	
-	local configurationFolderPath="$_program_etcPath"/shellfire/pxe/dnsmasq
-	local hostsConfigurationFolderPath="$configurationFolderPath"/hosts
-	local dhcpConfigurationFolderPath="$configurationFolderPath"/dhcp
-	local varRunFolderPath="$_program_varPath"/run
-	local varLibFolderPath="$_program_varPath"/lib/dnsmasq
-	pxe_utilities_runLongLived dnsmasq \
-		--conf-file="$configurationFolderPath"/dnsmasq.conf \
-		--conf-dir="$configurationFolderPath"/dnsmasq.conf.d \
-		--pid-file="$varRunFolderPath"/dnsmasq.pid \
-		--servers-file="$configurationFolderPath"/servers.conf \
-		--resolv-file="$configurationFolderPath"/resolv.conf \
-		--addn-hosts="$hostsConfigurationFolderPath"/normal.hosts \
-		--hostsdir="$hostsConfigurationFolderPath"/hosts.d \
-		--dhcp-hostsfile="$dhcpConfigurationFolderPath"/hosts.sighup.d \
-		--dhcp-hostsdir="$dhcpConfigurationFolderPath"/hosts.d \
-		--dhcp-optsfile="$dhcpConfigurationFolderPath"/opts.sighup.d \
-		--dhcp-optsdir="$dhcpConfigurationFolderPath"/opts.d \
-		--tftp-root="$varLibFolderPath"/tftp \
-		--dhcp-luascript="$configurationFolderPath"/dhcp.lua \
-		--dhcp-leasefile="$varLibFolderPath"/dhcp/leases \
-	
-	#dhcp-authoritative - allows lease database rebuild
 }

@@ -23,7 +23,7 @@ _program()
 		pxe_certificateAuthorityKeyFilePath="$pxe_certificateAuthorityFolderPath"/private-pxe-certificate-authority.key
 		pxe_tftpRootFolderPath="$_program_varPath"/lib/dnsmasq/tftp
 		pxe_ethernetInterface='eth0'
-		pxe_iPxeConfFolderPath="$_program_varPath"/shellfire/pxe/ipxe-configuration
+		pxe_iPxeConfFolderPath="$_program_etcPath"/shellfire/pxe/ipxe-configuration
 		pxe_iPxeCurrentFolderPath="$_program_libPath"/iPXE/current
 		
 		"$functionToExecuteForAction" "$@"
@@ -113,16 +113,21 @@ _program_commandLine_parse()
 			shift 1
 		;;
 		
+		setcap)
+			pxe_action="$1"
+			shift 1
+		;;
+		
 		x509)
 			pxe_action="$1"
 			shift 1
 		;;
 		
-		nbp_create)
+		nbp)
 			pxe_action="$1"
 			shift 1
 			
-			pxe_nbp_create_clean_default=false
+			pxe_nbp_clean_default=false
 			
 			_program_commandLine_optionExists()
 			{
@@ -144,7 +149,7 @@ _program_commandLine_parse()
 				case "$optionName" in
 					
 					c|clean)
-						pxe_nbp_create_clean=true
+						pxe_nbp_clean=true
 					;;
 					
 				esac
@@ -156,7 +161,7 @@ _program_commandLine_parse()
 					
 					c|clean)
 						core_validate_isBoolean $core_commandLine_exitCode_USAGE 'option' "$optionNameIncludingHyphens" "$optionValue"
-						pxe_nbp_create_clean="$optionValue"
+						pxe_nbp_clean="$optionValue"
 					;;
 					
 				esac
@@ -164,15 +169,15 @@ _program_commandLine_parse()
 			
 			_program_commandLine_validate()
 			{
-				if core_variable_isUnset pxe_nbp_create_clean; then
-					pxe_nbp_create_clean="$pxe_nbp_create_clean_default"
+				if core_variable_isUnset pxe_nbp_clean; then
+					pxe_nbp_clean="$pxe_nbp_clean_default"
 				fi
-				core_validate_isBoolean $core_commandLine_exitCode_CONFIG 'configuration setting' 'pxe_nbp_create_clean' "$pxe_nbp_create_clean"
+				core_validate_isBoolean $core_commandLine_exitCode_CONFIG 'configuration setting' 'pxe_nbp_clean' "$pxe_nbp_clean"
 				# Normalise boolean to something that can be used with if $value; then
-				if core_variable_isTrue "$pxe_nbp_create_clean"; then
-					pxe_nbp_create_clean=true
-				elif core_variable_isFalse "$pxe_nbp_create_clean"; then
-					pxe_nbp_create_clean=false
+				if core_variable_isTrue "$pxe_nbp_clean"; then
+					pxe_nbp_clean=true
+				elif core_variable_isFalse "$pxe_nbp_clean"; then
+					pxe_nbp_clean=false
 				fi
 			}
 		;;

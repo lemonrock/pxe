@@ -8,7 +8,7 @@ pxe_utilities_runLongLived()
 	env -i PATH="/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin" LC_ALL="en_US.UTF-8" "$@"
 }
 
-core_dependency_requires '*' head rm
+core_dependency_requires '*' head chmod rm
 pxe_utilities_signal()
 {
 	local program="$1"
@@ -32,6 +32,7 @@ pxe_utilities_signal()
 	fi
 	
 	if $removePidFile; then
+		chmod 0600 "$pidFilePath" 2>/dev/null || true
 		rm -rf "$pidFilePath"
 	fi
 }
@@ -66,7 +67,7 @@ pxe_utilities_setCapNetBindService()
 	fi
 }
 
-core_dependency_requires '*' head ps tail grep rm sleep awk
+core_dependency_requires '*' head ps tail grep rm sleep awk chmod
 pxe_utilities_start()
 {
 	local programName="$1"
@@ -86,10 +87,37 @@ pxe_utilities_start()
 	
 	printf '%s' "$programPid" >"$pidFilePath"
 	core_message INFO "$programName is running as PID '$programPid'"
+	chmod 0400 "$pidFilePath"
+}
+
+core_dependency_requires '*' rm head chmod
+pxe_utilities_postStartForProgramsThatCreateTheirOwnPidFile()
+{
+	local programName="$1"
+	core_message INFO "Sleeping 3 seconds until $programName has really started"
+	sleep 3
+	
+	local pidFilePath="$(pxe_utilities_pidFilePath "$programName")"
+	if ! core_path_isReadableNonEmptyFilePath "$pidFilePath"; then
+		rm -rf "$pidFilePath"
+		core_message FAIL "$programName did not start"
+		return 0
+	fi
+	chmod 0400 "$pidFilePath"
+	core_message INFO "$programName is running as PID '$(head -n 1 "$pidFilePath")'"
 }
 
 core_dependency_requires '*' ip awk
 pxe_utilities_ourIpV4Address()
 {
 	ip -family inet -oneline address show "$pxe_ethernetInterface" | awk '{print $4}' | awk -F'/' '{print $1}'
+}
+
+pxe_utilties_fqdn()
+{
+	local serverName="$1"
+	
+	local environmentName='dev'
+	local baseName='pxe.stormmq.com'
+	printf '%s.%s.%s' "$serverName" "$environmentName" "$baseName"
 }

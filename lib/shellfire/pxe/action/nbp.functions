@@ -5,8 +5,7 @@
 core_usesIn pxe openssl alpine
 core_dependency_requires '*' chmod cp make rm ln mv
 core_dependency_requires '*' gcc ld perl ar csplit
-# Effectively, add or update client...
-pxe_action_nbp_create()
+pxe_action_nbp()
 {
 	local clientId='any'
 	
@@ -20,12 +19,7 @@ pxe_action_nbp_create()
 	pxe_openssl_removePassPhrase "$pxe_certificatesFolderPath"/"$clientId".client.key "$decryptedServerCertificateFolderPath"/client.key
 	cp "$pxe_certificateAuthorityCertFilePath" "$decryptedServerCertificateFolderPath"/ca.crt
 	cp "$pxe_certificatesFolderPath"/"$clientId".client.crt "$decryptedServerCertificateFolderPath"/client.crt
-	
-	# At this point in time, we can not serve different undionly.kpxe files without re-generating dnsmasq.conf
-	# TODO: Get the vmlinuz image for this client if set up...
-	# pxe_crypto_signCode "$pxe_httpdFolderPath"/boot/vmlinuz."$clientId"
-	# pxe_crypto_generateNewClientAuthenticationCertificate "$clientId"
-	
+		
 	_pxe_action_nbp_create_clean
 	
 	rm -rf "$pxe_iPxeCurrentFolderPath"/src/config/local/"$clientId"
@@ -41,20 +35,22 @@ pxe_action_nbp_create()
 		 	CERT="$decryptedServerCertificateFolderPath"/ca.crt,"$decryptedServerCertificateFolderPath"/client.crt \
 		 	TRUST="$decryptedServerCertificateFolderPath"/ca.crt \
 		 	PRIVKEY="$decryptedServerCertificateFolderPath"/client.key \
-			DEBUG=tls
-		 	#1>/dev/null 2>/dev/null
+			DEBUG=tls \
+		 	1>/dev/null 2>/dev/null
 	popd
 		
 	rm -rf "$pxe_tftpRootFolderPath"/"$clientId".undionly.kpxe
 	mv "$pxe_iPxeCurrentFolderPath"/src/bin/undionly.kpxe "$pxe_tftpRootFolderPath"/"$clientId".undionly.kpxe
 	
 	_pxe_action_nbp_create_clean
+	
+	core_message NOTICE "Compiled Network Boot Program (nbp)"
 }
 
 core_dependency_requires '*' make rm git
 _pxe_action_nbp_create_clean()
 {
-	if ! $pxe_nbp_create_clean; then
+	if ! $pxe_nbp_clean; then
 		return 0
 	fi
 	

@@ -36,19 +36,19 @@ _pxe_action_x509_generateCertificateAuthorityCertificate()
 		return 0
 	fi
 	
-	openssl req -x509 -newkey rsa:4096 -out "$pxe_certificateAuthorityCertFilePath" -keyout "$pxe_certificateAuthorityKeyFilePath" -days 10000 -batch -subj '/C=UK/ST=North Yorkshire/L=Skipton/O=Stormmq IT Ltd/OU=IT/CN=ca.stormmq.com/emailAddress=admin@stormmq.com'
+	openssl req -x509 -newkey rsa:4096 -out "$pxe_certificateAuthorityCertFilePath" -keyout "$pxe_certificateAuthorityKeyFilePath" -days 10000 -batch -subj '/C=UK/ST=North Yorkshire/L=Skipton/O=Stormmq IT Ltd/OU=IT/CN='"$(pxe_utilties_fqdn 'ca')"'/emailAddress=admin@stormmq.com'
 	chmod 0400 "$pxe_certificateAuthorityCertFilePath" "$pxe_certificateAuthorityKeyFilePath"
 }
 
 _pxe_action_x509_generateNewServerAuthenticationCertificate()
 {
-	pxe_openssl_new_request 'server' "$(_pxe_action_x509_subjectAltNames)" -subj '/C=UK/ST=North Yorkshire/L=Skipton/O=Stormmq IT Ltd/OU=IT/CN=server.stormmq.com/emailAddress=admin@stormmq.com'
+	pxe_openssl_new_request 'server' "$(_pxe_action_x509_subjectAltNames)" -subj '/C=UK/ST=North Yorkshire/L=Skipton/O=Stormmq IT Ltd/OU=IT/CN='"$(pxe_utilities_ourIpV4Address)"'/emailAddress=admin@stormmq.com'
     pxe_openssl_ca_sign 'server'
 }
 
 _pxe_action_x509_generateNewCodeSigningCertificate()
 {
-	pxe_openssl_new_request 'code-signing' "$(_pxe_action_x509_subjectAltNames)" -subj '/C=UK/ST=North Yorkshire/L=Skipton/O=Stormmq IT Ltd/OU=IT/CN=code-signing.stormmq.com/emailAddress=admin@stormmq.com'
+	pxe_openssl_new_request 'code-signing' "$(_pxe_action_x509_subjectAltNames)" -subj '/C=UK/ST=North Yorkshire/L=Skipton/O=Stormmq IT Ltd/OU=IT/CN='"$(pxe_utilties_fqdn code-signing)"'/emailAddress=admin@stormmq.com'
 	pxe_openssl_ca_sign 'code-signing' -extensions codesigning
 }
 
@@ -56,6 +56,6 @@ _pxe_action_x509_generateNewClientAuthenticationCertificate()
 {
 	local clientId="$1"
 	
-	pxe_openssl_new_request "$clientId".client "$(_pxe_action_x509_subjectAltNames)" -subj '/C=UK/ST=North Yorkshire/L=Skipton/O=Stormmq IT Ltd/OU=IT/CN='"$clientId"'.client.stormmq.com/emailAddress=admin@stormmq.com'
+	pxe_openssl_new_request "$clientId".client "$(_pxe_action_x509_subjectAltNames)" -subj '/C=UK/ST=North Yorkshire/L=Skipton/O=Stormmq IT Ltd/OU=IT/CN='"$(pxe_utilties_fqdn "$clientId")"'/emailAddress=admin@stormmq.com'
     pxe_openssl_ca_sign "$clientId".client
 }

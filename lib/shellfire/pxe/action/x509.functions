@@ -56,7 +56,6 @@ _pxe_action_x509_generateNewClientAuthenticationCertificate()
 {
 	local clientId="$1"
 	
-	pxe_openssl_prompt "$clientId"
 	pxe_openssl_new_request "$clientId".client "$(_pxe_action_x509_subjectAltNames)" -subj '/C=UK/ST=North Yorkshire/L=Skipton/O=Stormmq IT Ltd/OU=IT/CN='"$clientId"'.client.stormmq.com/emailAddress=admin@stormmq.com'
     pxe_openssl_ca_sign "$clientId".client
 }

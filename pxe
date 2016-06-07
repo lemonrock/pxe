@@ -113,7 +113,7 @@ _program_commandLine_parse()
 			shift 1
 		;;
 		
-		new_certificate_authority|new_client_certificate)
+		x509|new_client_certificate)
 			pxe_action="$1"
 			shift 1
 		;;

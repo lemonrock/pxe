@@ -3,33 +3,27 @@
 
 
 core_usesIn pxe openssl
-pxe_action_new_certificate_authority()
+pxe_action_x509()
 {
-	_pxe_action_crypto_generateCertificateAuthorityCertificate
+	_pxe_action_x509_generateCertificateAuthorityCertificate
 	printf '%s\n' 1000 >"$pxe_certificateAuthorityFolderPath"/private-pxe-certificate-authority.srl
 	printf '1000' >"$pxe_certificateAuthorityFolderPath"/private-pxe-certificate-authority.idx
 	printf '%s\n' 'unique_subject = no' >"$pxe_certificateAuthorityFolderPath"/private-pxe-certificate-authority.idx.attr
 	
-	_pxe_action_crypto_generateNewServerAuthenticationCertificate
-	_pxe_action_crypto_generateNewCodeSigningCertificate
+	_pxe_action_x509_generateNewServerAuthenticationCertificate
+	_pxe_action_x509_generateNewCodeSigningCertificate
+	_pxe_action_x509_generateNewClientAuthenticationCertificate 'any'
 	
 	pxe_openssl_clean
 }
 
-pxe_action_new_client_certificate()
-{
-	_pxe_action_crypto_generateNewClientAuthenticationCertificate 'any'
-	
-	pxe_openssl_clean
-}
-
-_pxe_action_crypto_subjectAltNames()
+_pxe_action_x509_subjectAltNames()
 {
 	printf 'DNS:%s,IP:%s' 'stormmq.com' "$(pxe_utilities_ourIpV4Address)"
 }
 
 core_dependency_requires '*' mkdir chmod openssl
-_pxe_action_crypto_generateCertificateAuthorityCertificate()
+_pxe_action_x509_generateCertificateAuthorityCertificate()
 {
 	mkdir -m 0700 -p "$pxe_certificateAuthorityFolderPath"
 	chmod 0700 "$pxe_certificateAuthorityFolderPath"
@@ -42,27 +36,27 @@ _pxe_action_crypto_generateCertificateAuthorityCertificate()
 		return 0
 	fi
 	
-	openssl req -x509 -newkey rsa:4096 -out "$pxe_certificateAuthorityCertFilePath" -keyout "$pxe_certificateAuthorityKeyFilePath" -days 10000 -batch -subj '/C=UK/ST=North Yorkshire/L=Skipton/O=Stormmq IT Ltd/OU=IT/CN=*.stormmq.com/emailAddress=admin@stormmq.com'
+	openssl req -x509 -newkey rsa:4096 -out "$pxe_certificateAuthorityCertFilePath" -keyout "$pxe_certificateAuthorityKeyFilePath" -days 10000 -batch -subj '/C=UK/ST=North Yorkshire/L=Skipton/O=Stormmq IT Ltd/OU=IT/CN=ca.stormmq.com/emailAddress=admin@stormmq.com'
 	chmod 0400 "$pxe_certificateAuthorityCertFilePath" "$pxe_certificateAuthorityKeyFilePath"
 }
 
-_pxe_action_crypto_generateNewServerAuthenticationCertificate()
+_pxe_action_x509_generateNewServerAuthenticationCertificate()
 {
-	pxe_openssl_new_request 'server' "$(_pxe_action_crypto_subjectAltNames)" -subj '/C=UK/ST=North Yorkshire/L=Skipton/O=Stormmq IT Ltd/OU=IT/CN=*.stormmq.com/emailAddress=admin@stormmq.com'
+	pxe_openssl_new_request 'server' "$(_pxe_action_x509_subjectAltNames)" -subj '/C=UK/ST=North Yorkshire/L=Skipton/O=Stormmq IT Ltd/OU=IT/CN=server.stormmq.com/emailAddress=admin@stormmq.com'
     pxe_openssl_ca_sign 'server'
 }
 
-_pxe_action_crypto_generateNewCodeSigningCertificate()
+_pxe_action_x509_generateNewCodeSigningCertificate()
 {
-	pxe_openssl_new_request 'code-signing' "$(_pxe_action_crypto_subjectAltNames)" -subj '/C=UK/ST=North Yorkshire/L=Skipton/O=Stormmq IT Ltd/OU=IT/CN=*.stormmq.com/emailAddress=admin@stormmq.com'
+	pxe_openssl_new_request 'code-signing' "$(_pxe_action_x509_subjectAltNames)" -subj '/C=UK/ST=North Yorkshire/L=Skipton/O=Stormmq IT Ltd/OU=IT/CN=code-signing.stormmq.com/emailAddress=admin@stormmq.com'
 	pxe_openssl_ca_sign 'code-signing' -extensions codesigning
 }
 
-_pxe_action_crypto_generateNewClientAuthenticationCertificate()
+_pxe_action_x509_generateNewClientAuthenticationCertificate()
 {
 	local clientId="$1"
 	
-	_pxe_action_crypto_prompt "$clientId"
-	pxe_openssl_new_request "$clientId".client "$(_pxe_action_crypto_subjectAltNames)"
+	pxe_openssl_prompt "$clientId"
+	pxe_openssl_new_request "$clientId".client "$(_pxe_action_x509_subjectAltNames)" -subj '/C=UK/ST=North Yorkshire/L=Skipton/O=Stormmq IT Ltd/OU=IT/CN='"$clientId"'.client.stormmq.com/emailAddress=admin@stormmq.com'
     pxe_openssl_ca_sign "$clientId".client
 }

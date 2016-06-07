@@ -24,9 +24,7 @@ _program()
 		pxe_tftpRootFolderPath="$_program_varPath"/lib/dnsmasq/tftp
 		pxe_ethernetInterface='eth0'
 		pxe_iPxeConfFolderPath="$_program_varPath"/shellfire/pxe/ipxe-configuration
-		
-		
-		pxe_iPxeCurrentFolderPath="$_program_etcPath"/shellfire/pxe/iPXE/current
+		pxe_iPxeCurrentFolderPath="$_program_libPath"/iPXE/current
 		
 		"$functionToExecuteForAction" "$@"
     }

@@ -27,13 +27,13 @@ pxe_utilities_signal()
 	local exitCode=$?
 	set -e
 	
-	if [ $exitCode -ne 0 ]; then
-		core_exitError $core_commandLine_exitCode_CONFIG "Could not send signal '$signal' to $program at pid '$pid' from pid file '$pidFilePath'"
-	fi
-	
 	if $removePidFile; then
 		chmod 0600 "$pidFilePath" 2>/dev/null || true
-		rm -rf "$pidFilePath"
+		rm -rf "$pidFilePath" || true
+	fi
+	
+	if [ $exitCode -ne 0 ]; then
+		core_exitError $core_commandLine_exitCode_CONFIG "Could not send signal '$signal' to $program at pid '$pid' from pid file '$pidFilePath'"
 	fi
 }
 

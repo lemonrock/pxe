@@ -31,14 +31,14 @@ pxe_action_nbp()
 	
 	pushd "$pxe_iPxeCurrentFolderPath"/src
 		
-		 make bin/undionly.kpxe \
-		 	CONFIG="$clientId" \
-		 	EMBED="$pxe_iPxeConfFolderPath"/embed.ipxe \
-		 	CERT="${trustedCertificateAuthorities}${decryptedServerCertificateFolderPath}"/ca.crt,"$decryptedServerCertificateFolderPath"/client.crt \
-		 	TRUST="${trustedCertificateAuthorities}$decryptedServerCertificateFolderPath"/ca.crt \
-		 	PRIVKEY="$decryptedServerCertificateFolderPath"/client.key \
-			DEBUG=tls \
-		 	1>/dev/null 2>/dev/null
+		# DEBUG=tls,httpcore:3,http \
+		make bin/undionly.kpxe \
+			CONFIG="$clientId" \
+			EMBED="$pxe_iPxeConfFolderPath"/embed.ipxe \
+			CERT="${trustedCertificateAuthorities}${decryptedServerCertificateFolderPath}"/ca.crt,"$decryptedServerCertificateFolderPath"/client.crt \
+			TRUST="${trustedCertificateAuthorities}$decryptedServerCertificateFolderPath"/ca.crt \
+			PRIVKEY="$decryptedServerCertificateFolderPath"/client.key \
+			1>/dev/null 2>/dev/null
 		 
 	popd
 		

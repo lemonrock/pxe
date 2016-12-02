@@ -25,34 +25,8 @@ execute_ipxe()
 		return_empty notFound
 	fi
 	local ip="$extract_value_from_query_string_RESULT"
-	
-	#http://wiki.alpinelinux.org/wiki/PXE_boot
-	#ip=${net0/ip}::${net0/gateway}:${net0/netmask}::eth0: apkvol=https://${proxydhcp/dhcp-server}/cgi-bin/apkvol?uuid=${uuid}&ip=${net0/ip} alpine_dev=LABEL=store alpine_repo=http://dl-cdn.alpinelinux.org/alpine/v3.4/main
-	
-# 	return_plaintext '#!ipxe
-# set memdisk https://${proxydhcp/dhcp-server}/memdisk
-#
-# # NetBSD and PC-BSD are not supported by netboot.xyz, but are supported by http://boot.salstar.sk/
-#
-# :alpine_linux_menu
-# set alpine_linux_version_major 3.4
-# set alpine_linux_version_minor ${alpine_linux_version_major}.0
-# cpuid --ext 29 && set alpine_linux_arch x86_64 || set alpine_linux_arch x86
-# set alpine_linux_variant alpine
-# menu Alpine Linux Installation
-# item alpine Normal
-# item alpine-extended Extended
-# item alpine-vanilla Vanilla
-# item alpine-virt Virtualisation Enhanced
-# item alpine-xen Xen Virtualisation Enhanced
-# choose --default alpine --timeout 3000 alpine_linux_variant || exit
-# iseq ${alpine_linux_variant}${alpine_linx_arch} alpine-xenx86 && goto alpine_linux_menu ||
-# kernel ${memdisk} iso raw
-# initrd http://dl-cdn.alpinelinux.org/alpine/v${alpine_linux_version_major}/releases/${alpine_linux_arch}/${alpine_linux_variant}-${alpine_linux_version_minor}-${alpine_linux_arch}.iso
-# boot
-# '
 
-#vga=ask
+	#vga=ask
 	return_plaintext '#!ipxe
 chain https://${proxydhcp/dhcp-server}/boot/vmlinuz vga=6 ip=dhcp
 '
